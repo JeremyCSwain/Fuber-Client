@@ -1,8 +1,27 @@
 "use strict";
 
 
-var app = angular.module('Fuber', ['ionic','ngCordova']);
- 
+var app = angular.module('Fuber', ['ionic','ngCordova','ngRoute', 'firebase']).constant("localAPI", "http://localhost:3000/api");
+
+// Routings for partials and their controllers for user views.
+app.config(["$routeProvider",
+  function ($routeProvider) {
+    $routeProvider.
+      when("/login", {
+        templateUrl: "partials/login.html",
+        controller: "loginCtrl"
+      }).
+      when("/truck-main", {
+        templateUrl: "partials/truck_map_view.html",
+        controller: "truckMapCtrl"
+      }).
+      otherwise({
+        redirectTo: "/truck-main"
+      });
+  }
+]);
+
+
 app.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -16,56 +35,14 @@ app.run(function($ionicPlatform) {
   });
 });
  
-app.controller('MapController', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform) {
-     
-  $ionicPlatform.ready(function() {    
 
-    var lat;
-    var long;
 
-    $ionicLoading.show({
-      template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
-    });
-     
-    var posOptions = {
-      enableHighAccuracy: true,
-      timeout: 20000,
-      maximumAge: 0
-    };
 
-    $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
-      lat  = position.coords.latitude;
-      long = position.coords.longitude;
-      
-      console.log("coords", lat, long);
-      var myLatlng = new google.maps.LatLng(lat, long);
-       
-      var mapOptions = {
-        center: myLatlng,
-        zoom: 16,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-      };          
-       
-      var map = new google.maps.Map(document.getElementById("map"), mapOptions);          
-       
-      $scope.map = map;   
-      $ionicLoading.hide();  
 
-         
-    }, function(err) {
-      $ionicLoading.hide();
-      console.log(err);
-    })
-    .then(
-      function () {
-        $http.post(
-          `http://localhost:3000/api/truck_loc/`,
-          JSON.stringify({
-            lat: lat,
-            long: long
-          })
-        )
-      }
-    )
-  })               
-});
+
+
+
+
+
+
+
