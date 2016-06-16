@@ -1,7 +1,7 @@
 "use strict";
 
 
-var app = angular.module('Fuber', ['ionic','ngCordova','ngRoute', 'firebase']).constant("localAPI", "http://localhost:3000/api");
+let app = angular.module('Fuber', ['ionic','ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
 
 // Routings for partials and their controllers for user views.
 app.config(["$routeProvider",
@@ -16,7 +16,7 @@ app.config(["$routeProvider",
         controller: "truckMapCtrl"
       }).
       otherwise({
-        redirectTo: "/truck-main"
+        redirectTo: "/login"
       });
   }
 ]);
