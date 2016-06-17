@@ -1,4 +1,16 @@
-/* Empty. Add your own CSS if you like */
+/* Coolors Exported Palette - coolors.co/ffffff-00171f-003459-007ea7-00a8e8 */
+/*
+$white: #ffffff; //rgba(255, 255, 255, 100)
+$black: #00171f; //rgba(0, 23, 31, 100)
+$darkblue: #003459; //rgba(0, 52, 89, 100)
+$medblue: #007ea7; //rgba(0, 126, 167, 100)
+$lightblue: #00a8e8; //rgba(0, 168, 232, 100)
+*/
+
+/*Login/Register Buttons*/
+.login_btn {
+	width: 45vw;
+}
 
 #map {
     height: 100%;
@@ -7,4 +19,8 @@
 
 .scroll {
     height: 100%;
+}
+
+.center {
+	text-align: center;
 }
