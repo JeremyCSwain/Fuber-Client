@@ -9,8 +9,12 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 
   	$scope.account = {
   		email: "",
-  		password: "",
-  		username: ""
+  		password: ""
+  	};
+
+  	$scope.user = {
+  		username: "",
+  		is_truck: false
   	};
 
 		// Registers a new user and creates a new user_data object.
@@ -24,7 +28,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 					console.log(`Error creating user: ${error}`);
 				} else {
 					console.log(`Created user account with UID: ${userData.uid}`, userData);
-					authFactory.storeUser(userData.uid, $scope.account.email, $scope.account.username);
+					authFactory.storeUser(userData.uid, $scope.account, $scope.user);
 					$scope.login();
 				}
 			});
