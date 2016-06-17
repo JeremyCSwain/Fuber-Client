@@ -45,7 +45,6 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 						$location.path("/user-main");
 						$scope.$apply();
 					};
-					// authFactory.getUser();
 				})
 		};
   // End ionicPlatform.ready()

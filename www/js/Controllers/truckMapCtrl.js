@@ -7,14 +7,18 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
 
     let ref = new Firebase(firebaseURL);
 
-    let currentUser = [];  
+    let currentUser = {};
 
     authFactory.getUser().then(UserObj => {
       let authData = ref.getAuth();
-      currentUser = authData;
-      $scope.$apply();
+      for (var i = 0; i < UserObj.length; i++) {
+        if(UserObj[i].firebaseUID == authData.uid) {
+          currentUser = UserObj[i];
+          $scope.$apply();
+        }
       }
-    );
+      console.log("Current User:", currentUser);
+    });
 
     var lat;
     var long;
@@ -34,7 +38,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       lat  = position.coords.latitude;
       long = position.coords.longitude;
       
-      console.log("coords", lat, long);
+      console.log("Current Coords:", lat, long);
 
       // Set user's coords
       var myLatLng = new google.maps.LatLng(lat, long);
@@ -59,7 +63,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       // GET all truck locations
       $scope.getAllTrucks = function () {
         return new Promise(function (resolve, reject) {
-          $http.get(`http://localhost:3000/api/truck_loc`)
+          $http.get(`http://localhost:3000/api/truck_user`)
           .success(
             allCoordsObj => resolve(allCoordsObj),
             error => reject(error)
@@ -71,7 +75,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       $scope.getAllTrucks().then(
         allCoordsObj => {
           allCoords = allCoordsObj;
-          console.log("??", allCoords);
+          console.log("All Truck User Coords:", allCoords);
         }
       )
       .then(
