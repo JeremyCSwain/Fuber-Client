@@ -75,8 +75,6 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         }
       );
 
-      // $scope.generateMarkers(allCoords);
-
        
       $scope.map = map;   
       $ionicLoading.hide();  
