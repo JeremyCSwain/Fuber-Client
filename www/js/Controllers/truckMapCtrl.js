@@ -18,12 +18,14 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       maximumAge: 0
     };
 
+    // Get user's current position lat, long
     $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
       lat  = position.coords.latitude;
       long = position.coords.longitude;
       
       console.log("coords", lat, long);
 
+      // Set user's coords
       var myLatLng = new google.maps.LatLng(lat, long);
        
       var mapOptions = {
@@ -31,40 +33,58 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         zoom: 16,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };  
-       
+      
+      // Open New Google Map
       var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-      var allCoords = [
-          {"lat":36.1325977,"long":-86.75663829999999},
-          {"lat":36.1420921,"long":-86.7693982},
-          {"lat":36.1392416,"long":-86.7633095},
-          {"lat":36.1422776,"long":-86.764577},
-          {"lat":36.1441931,"long":-86.7788615}
-        ];
+      // Drop marker on user's location
+      new google.maps.Marker({
+        position: new google.maps.LatLng(lat, long),
+        map: map
+      });
 
-      function generateMarkers(locations) {
-        for (var i = 0; i < allCoords.length; i++) {  
-          new google.maps.Marker({
-            position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
-            map: map,
-            icon: `img/truck_icon.png`
-          });
+      let allCoords = [];
+
+      // GET all truck locations
+      $scope.getAllTrucks = function () {
+        return new Promise(function (resolve, reject) {
+          $http.get(`http://localhost:3000/api/truck_loc`)
+          .success(
+            allCoordsObj => resolve(allCoordsObj),
+            error => reject(error)
+          )
+        })
+      };
+
+      // Invoke GET
+      $scope.getAllTrucks().then(
+        allCoordsObj => {
+          allCoords = allCoordsObj;
           console.log("??", allCoords);
         }
-      };
-      generateMarkers(allCoords);
+      )
+      .then(
+        function () {
+          for (var i = 0; i < allCoords.length; i++) {  
+            new google.maps.Marker({
+              position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
+              map: map,
+              icon: `img/truck_icon.png`
+            });
+          }
+        }
+      );
 
-      // var marker = new google.maps.Marker({
-      //   position: allCoords,
-      //   map: map,
-      //   icon: `img/truck_icon.png`
-      // });        
+      // $scope.generateMarkers(allCoords);
+
        
       $scope.map = map;   
       $ionicLoading.hide();  
 
          
-    }, function(err) {
+    }, 
+
+    function(err) {
       $ionicLoading.hide();
       console.log(err);
     })
