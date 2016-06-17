@@ -13,23 +13,23 @@ app.factory("authFactory", function ($http, firebaseURL) {
     isAuthenticated () {
       let authData = ref.getAuth();
       if (authData) {
-        // currentUserData = authData.uid;
+        currentUserData = authData.uid;
         return true;    
       } else {
         return false;
       }
     },
 
-    // // getUser() returns the currentUserData which contains both the uid and userName.
-    // getUser () {
-    //   return new Promise(function (resolve, reject) {
-    //     $http.get(`${firebaseURL}/user_data/${currentUserData}.json`)
-    //     .success(
-    //       userObj => resolve(userObj),
-    //       error => reject(error)
-    //     )
-    //   });
-    // },
+    // getUser() returns the currentUserData which contains both the uid and userName.
+    getUser () {
+      return new Promise(function (resolve, reject) {
+        $http.get(`http://localhost:3000/api/users/`)
+        .success(
+          userObj => resolve(userObj),
+          error => reject(error)
+        )
+      });
+    },
 
     // Authenticates user through Firebase
     authenticate (credentials) {
@@ -51,6 +51,13 @@ app.factory("authFactory", function ($http, firebaseURL) {
 
     // Upon registration, storeUser() creates an object within the user_data object that contains the uid, userName, and user auth status.
     storeUser (firebaseUid, account, user) {
+    	let userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
+	      userRef.set({
+	        uid: firebaseUid,
+	        email: account.email,
+	        username: user.username,
+	        is_truck: user.is_truck,
+	      });
     	$http.post(
     		`http://localhost:3000/api/users`,
     		JSON.stringify({
