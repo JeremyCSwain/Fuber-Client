@@ -28,6 +28,11 @@ app.config(["$routeProvider",
         controller: "truckMapCtrl",
         resolve: {isAuth}
       }).
+      when("/user-main", {
+        templateUrl: "partials/user_map_view.html",
+        controller: "userMapCtrl",
+        resolve: {isAuth}
+      }).
       otherwise({
         redirectTo: "/login"
       });
