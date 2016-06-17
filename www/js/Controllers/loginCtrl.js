@@ -38,8 +38,13 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 		$scope.login = function () {
 			authFactory.authenticate($scope.account)
 				.then(function () {
-					$location.path("/truck-main");
-					$scope.$apply();
+					if ($scope.user.is_truck) {
+						$location.path("/truck-main");
+						$scope.$apply();
+					} else if (!$scope.user.is_truck) {
+						$location.path("/user-main");
+						$scope.$apply();
+					};
 					// authFactory.getUser();
 				})
 		};
