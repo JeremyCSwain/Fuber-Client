@@ -5,6 +5,17 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
      
   $ionicPlatform.ready(function() {    
 
+    let ref = new Firebase(firebaseURL);
+
+    let currentUser = [];  
+
+    authFactory.getUser().then(UserObj => {
+      let authData = ref.getAuth();
+      currentUser = authData;
+      $scope.$apply();
+      }
+    );
+
     var lat;
     var long;
 
@@ -75,11 +86,9 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         }
       );
 
-       
       $scope.map = map;   
       $ionicLoading.hide();  
-
-         
+   
     }, 
 
     function(err) {
