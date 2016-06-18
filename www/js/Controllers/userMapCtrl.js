@@ -101,6 +101,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
             }
           }
         );
+        
         // Begin marker refresh of truck locs on setInterval
         window.setInterval(
           function () {
