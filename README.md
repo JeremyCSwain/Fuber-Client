@@ -3,7 +3,7 @@
 
 ####*Please note: Fuber is still in its development stage.
 
-Fuber is meant to be an easy to use app for iOS or Android built using the Ionic framework for mobile development and AngularJS on the front-end and incorporates MongoDB, Express, and Node.js for server-side development.
+Fuber is meant to be an easy to use app for iOS or Android built using the Ionic framework for mobile development and AngularJS on the front-end and incorporating MongoDB, Express, and Node.js for server-side development.
 
 Fuber was created to be a tool for food truck proprieters who wish to broadcast to a large audience their constant location as well as customers who seek to find food truck options in real time or a specific truck's location at any given time.
 
