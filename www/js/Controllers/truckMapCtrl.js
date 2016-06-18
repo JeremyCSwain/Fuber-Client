@@ -78,10 +78,24 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
         // Drop marker on user's location
-        new google.maps.Marker({
+        var truckMarker = new google.maps.Marker({
           position: new google.maps.LatLng(lat, long),
           map: map
         });
+
+        truckMarker.setPosition(myLatLng);
+
+        window.setInterval(
+          function () {
+            $http.put(
+              `http://localhost:3000/api/truck_user/${currentTruck._id}`,
+              JSON.stringify({
+                lat: lat,
+                long: long
+              })
+            )
+          }, 5000
+        );
 
         // If pulling in all truck locs, set empty array for coords.
         let allCoords = [];
@@ -120,7 +134,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         //     );
         //   }, 1000 
         // );
-        
+
         $scope.map = map;   
         $ionicLoading.hide();     
       }, 
