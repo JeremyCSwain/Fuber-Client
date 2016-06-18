@@ -4,16 +4,12 @@ app.factory("authFactory", function ($http, firebaseURL) {
 
   let ref = new Firebase(firebaseURL);
 
-  let currentUserData;
-  let currentUID;
-
   return {
 
     // Checks if user is authenticated.
     isAuthenticated () {
       let authData = ref.getAuth();
       if (authData) {
-        currentUserData = authData.uid;
         return true;    
       } else {
         return false;
@@ -29,6 +25,17 @@ app.factory("authFactory", function ($http, firebaseURL) {
           error => reject(error)
         )
       });
+    },
+
+    // getTruck() returns the truck user objects
+    getTruck () {
+    	return new Promise(function (resolve, reject) {
+ 				$http.get(`http://localhost:3000/api/truck_user`)
+ 				.success(
+ 					truckObj => resolve(truckObj),
+ 					error => reject(error)
+ 				)  		
+    	});
     },
 
     // Authenticates user through Firebase
@@ -52,12 +59,22 @@ app.factory("authFactory", function ($http, firebaseURL) {
     // Upon registration, storeUser() creates an object within the user_data object that contains the uid, userName, and user auth status.
     storeUser (firebaseUid, account, user) {
     	let userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
-	      userRef.set({
-	        uid: firebaseUid,
-	        email: account.email,
-	        username: user.username,
-	        is_truck: user.is_truck,
-	      });
+      userRef.set({
+        uid: firebaseUid,
+        email: account.email,
+        username: user.username,
+        is_truck: user.is_truck,
+      });
+	    // If the user is_truck store the user info into the truck_user table data
+	    if (user.is_truck) {
+	    	$http.post(
+	    		`http://localhost:3000/api/truck_user`,
+    			JSON.stringify({
+    				firebaseUID: firebaseUid,
+    				contact_info: account.email
+    			})
+	    	)
+	    };
     	$http.post(
     		`http://localhost:3000/api/users`,
     		JSON.stringify({
