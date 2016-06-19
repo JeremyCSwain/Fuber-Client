@@ -12,8 +12,13 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
   		password: ""
   	};
 
-  	$scope.user = {
+  	$scope.newUser = {
   		username: "",
+  		truck_name: "",
+  		cuisine: "",
+  		contact_info: "",
+  		website_url: "",
+  		twitter_handle: "",
   		is_truck: false
   	};
 
@@ -28,7 +33,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 					console.log(`Error creating user: ${error}`);
 				} else {
 					console.log(`Created user account with UID: ${userData.uid}`, userData);
-					authFactory.storeUser(userData.uid, $scope.account, $scope.user);
+					authFactory.storeUser(userData.uid, $scope.account, $scope.newUser);
 					$scope.login();
 				}
 			});
@@ -43,6 +48,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 				})
 		};
 
+		// User modal partial for new account registration
 		$ionicModal.fromTemplateUrl('../partials/modal.html', {
       scope: $scope,
       animation: 'slide-in-up'
@@ -63,13 +69,14 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
       $scope.modal.remove();
     });
 
+    // Ionic Material Ripple Effect
     var reset = function() {
       var inClass = document.querySelectorAll('.in');
       for (var i = 0; i < inClass.length; i++) {
         inClass[i].classList.remove('in');
         inClass[i].removeAttribute('style');
       }
-      
+
       var done = document.querySelectorAll('.done');
       for (var i = 0; i < done.length; i++) {
         done[i].classList.remove('done');
