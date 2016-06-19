@@ -94,7 +94,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
                 long: long
               })
             )
-          }, 1000
+          }, 20000
         );
 
         // // If pulling in all truck locs, set empty array for coords.
