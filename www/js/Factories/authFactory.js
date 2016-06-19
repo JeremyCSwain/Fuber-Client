@@ -71,10 +71,15 @@ app.factory("authFactory", function ($http, firebaseURL) {
 	    		`http://localhost:3000/api/truck_user`,
     			JSON.stringify({
     				firebaseUID: firebaseUid,
-    				contact_info: account.email
+    				truck_name: user.truck_name,
+    				cuisine: user.cuisine,
+    				contact_info: user.contact_info,
+    				website_url: user.website_url,
+    				twitter_handle: user.twitter_handle
     			})
 	    	)
 	    };
+	    // Set default user data
     	$http.post(
     		`http://localhost:3000/api/users`,
     		JSON.stringify({
