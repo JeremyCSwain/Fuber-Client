@@ -20,8 +20,24 @@
 			</ion-checkbox>
 		</div>
 
-  	<ion-list id="ripple-list" class="disable-user-behavior animate-ripple ion-ripple-list">
+  	<ion-list id="ripple-list" class="disable-user-behavior animate-ripple ion-ripple-list" ng-if="isTruck()">
   		<div class="list">
+
+	  		<ion-item nav-clear menu-close class="item in in done row" style="transition-delay: 0.39s;">
+	  			<label class="item item-input item-md-label" highlight-color="calm" type="text">
+						<input class="center" type="text" placeholder="enter email address" ng-model="account.email">
+						<span class="input-label"></span>
+						<div class="highlight highlight-calm"></div>
+					</label>
+	  		</ion-item>
+
+	  		<ion-item nav-clear menu-close class="item in in done row" style="transition-delay: 0.39s;">
+	  			<label class="item item-input item-md-label" highlight-color="calm" type="text">
+						<input class="center" type="text" placeholder="create a password" ng-model="account.password">
+						<span class="input-label"></span>
+						<div class="highlight highlight-calm"></div>
+					</label>
+	  		</ion-item>
 
 	  		<ion-item nav-clear menu-close class="item in in done row" style="transition-delay: 0.39s;">
 	  			<label class="item item-input item-md-label" highlight-color="calm" type="text">
