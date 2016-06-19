@@ -22,6 +22,16 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
   		is_truck: false
   	};
 
+  	$scope.isTruck = function () {
+  		if ($scope.newUser.is_truck) {
+  			return true;
+  			$scope.$apply();
+  		} else {
+  			return false;
+  			$scope.$apply();
+  		}
+  	};
+
 		// Registers a new user and creates a new user_data object.
 		$scope.register = function () {
 			ref.createUser({
