@@ -7,9 +7,23 @@ $medblue: #007ea7; //rgba(0, 126, 167, 100)
 $lightblue: #00a8e8; //rgba(0, 168, 232, 100)
 */
 
-/*Login/Register Buttons*/
-.login_btn {
-	width: 45vw;
+@font-face {
+	font-family: 'Silverfake';
+	src: url("../fonts/Silverfake.otf");
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+}
+
+.center {
+	text-align: center;
+}
+
+.logo {
+	font-family: 'Silverfake';
+	color: white;
 }
 
 #map {
@@ -19,8 +33,4 @@ $lightblue: #00a8e8; //rgba(0, 168, 232, 100)
 
 .scroll {
     height: 100%;
-}
-
-.center {
-	text-align: center;
 }

@@ -94,13 +94,43 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
                 long: long
               })
             )
-          }, 5000
+          }, 1000
         );
 
-        // If pulling in all truck locs, set empty array for coords.
-        let allCoords = [];
+        // // If pulling in all truck locs, set empty array for coords.
+        // let allCoords = [];
+        // let truckMarker;
 
-        // // If the Truck user decides to see other trucks, toggle view on and refresh allTruckCoords
+        // // Get all truck locs, then refresh on setInterval
+        // $scope.getAllTrucks = function () {
+        //   return new Promise(function (resolve, reject) {
+        //     $http.get(`http://localhost:3000/api/truck_user`)
+        //     .success(
+        //       allCoordsObj => resolve(allCoordsObj),
+        //       error => reject(error)
+        //     )
+        //   })
+        // };
+        // // Invoke GET
+        // $scope.getAllTrucks().then(
+        //   allCoordsObj => {
+        //     allCoords = allCoordsObj;
+        //     console.log("All Truck User Coords:", allCoords);
+        //   }
+        // )
+        // .then(
+        //   function () {
+        //     for (var i = 0; i < allCoords.length; i++) {  
+        //       truckMarker = new google.maps.Marker({
+        //         position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
+        //         map: map,
+        //         icon: `img/truck_icon.png`
+        //       });
+        //     }
+        //   }
+        // );
+        
+        // // Begin marker refresh of truck locs on setInterval
         // window.setInterval(
         //   function () {
         //     // GET all truck locations
@@ -113,7 +143,6 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         //         )
         //       })
         //     };
-
         //     // Invoke GET
         //     $scope.getAllTrucks().then(
         //       allCoordsObj => {
@@ -123,12 +152,9 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         //     )
         //     .then(
         //       function () {
-        //         for (var i = 0; i < allCoords.length; i++) {  
-        //           new google.maps.Marker({
-        //             position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
-        //             map: map,
-        //             icon: `img/truck_icon.png`
-        //           });
+        //         for (var i = 0; i < allCoords.length; i++) {
+        //           let currTruckCoord = new google.maps.LatLng(allCoords[i].lat, allCoords[i].long);
+        //           truckMarker.setPosition(currTruckCoord);
         //         }
         //       }
         //     );

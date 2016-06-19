@@ -1,7 +1,7 @@
 "use strict";
 
 
-let app = angular.module('Fuber', ['ionic','ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
+let app = angular.module('Fuber', ['ionic', 'ionic-material', 'ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
 
 
 // Creates a promise for each view that requires user authentication before resolving.

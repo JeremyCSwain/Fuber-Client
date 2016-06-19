@@ -1,10 +1,59 @@
-<div class="list">
+<div class="ionic login" style="background-image: url('../img/background-gradient.jpg');">
 
-	<div id="header_constant" class="item bar bar-header bar-calm">
-	  <h1 class="title">fuber</h1>
+	<div class="hero no-header flat">
+		<div class="content">
+			<img src="../img/mobile-food-truck-hi.png" style="height: 50%; width: 50%;">
+			<h1 class="logo">fUber</h1>	
+		</div>
 	</div>
 
-  <label class="item item-input">
+	<div class="list">
+		<label class="item item-input item-md-label" highlight-color="energized" type="text">
+			<input class="center" type="text" placeholder="Email" ng-model="account.email">
+			<span class="input-label"></span>
+			<div class="highlight highlight-energized"></div>
+		</label>
+		<label class="item item-input item-md-label" highlight-color="energized" type="text">
+			<input class="center" type="text" placeholder="Password" ng-model="account.password">
+			<span class="input-label"></span>
+			<div class="highlight highlight-energized"></div>
+		</label>
+	</div>
+
+	<div class="padding">
+		<button class="button button-block button-calm waves-effect waves-button waves-light">Login</button>
+	</div>
+
+	<div class="logo center">
+		New to fUber?
+	</div>
+
+	<div class="padding">
+		<button class="button button-block button-calm waves-effect waves-button waves-light" ng-click="openModal()">Register</button>
+	</div>
+
+	<div class="padding">
+	</div>
+
+	<div class="padding">
+	</div>
+
+	<div class="padding">	
+	</div>
+
+	<div class="padding">
+	</div>
+
+	<div class="padding">
+	</div>	
+</div>
+
+
+<!-- 	<div id="header_constant" class="item bar bar-header bar-calm">
+	  <h1 class="title">fuber</h1>
+	</div> -->
+
+<!--   <label class="item item-input">
     <span class="input-label">Email</span>
     <input type="text" ng-model="account.email">
   </label>
@@ -14,13 +63,11 @@
     <input type="password" ng-model="account.password">
   </label>
 
-</div>
-
-<div>
-	<label class="item item-input">
+  <label class="item item-input">
     <span class="input-label">Username</span>
     <input type="text" ng-model="user.username">
   </label>
+
 </div>
 
 <div class="bar bar-footer bar-calm">
@@ -33,13 +80,7 @@
     <div class="handle"></div>
 	</div>
 </div>
+ -->
 
-<div class="center bar bar">
-	<button class="button button-calm login_btn" ng-click="login()">
-	  Login
-	</button>
+	
 
-	<button class="button button-calm login_btn" ng-click="register()">
-	  Register
-	</button>
-</div>
