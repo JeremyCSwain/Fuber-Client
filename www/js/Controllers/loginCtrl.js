@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, authFactory, firebaseURL) {
+app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, authFactory, firebaseURL) {
   
   let ref = new Firebase(firebaseURL);
 
@@ -42,8 +42,46 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 					$scope.$apply();
 				})
 		};
+
+		$ionicModal.fromTemplateUrl('../partials/modal.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modal = modal;
+    });
+
+    $scope.openModal = function() {
+      $scope.modal.show();
+    };
+
+    $scope.closeModal = function() {
+	    $scope.modal.hide();
+	  };
+
+    // Cleanup the modal when we're done with it
+    $scope.$on('$destroy', function() {
+      $scope.modal.remove();
+    });
+
   // End ionicPlatform.ready()
   });
 
 // End app.controller
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

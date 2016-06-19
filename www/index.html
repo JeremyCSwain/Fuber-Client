@@ -5,15 +5,17 @@
     <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src  'self' 'unsafe-inline' *">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <title>Fuber</title>
-    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link rel="stylesheet" href="lib/ionic/css/ionic.css">
+    <link rel="stylesheet" href="lib/ionic-material/dist/ionic.material.min.css">
     <link href="css/style.css" rel="stylesheet">
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="lib/ionic-material/dist/ionic.material.min.js"></script>
     <!-- cordova script (this will be a 404 during development) -->
     <script src="js/ng-cordova.min.js"></script>    
    
   </head>
-  <body ng-app="Fuber">
+  <body class="grade-a platform-browser platform-macintel platform-ready" ng-app="Fuber">
 
     <div ng-view>
       <ion-content>
@@ -21,7 +23,7 @@
       </ion-content>
     </div>
 
-
+    <div id="modal" class=""></div>
 
     <!-- Google Maps open API -->
     <script src="https://maps-api-ssl.google.com/maps/api/js?libraries=places"></script>  
