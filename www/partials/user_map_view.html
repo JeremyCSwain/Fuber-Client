@@ -1,13 +1,31 @@
+
 <ion-pane>
 
-  <ion-header-bar class="bar-stable" ng-show="{{ currentUser.is_truck }}">
-    <h1 class="title">User View</h1>
-  </ion-header-bar>
+	<ion-header-bar class="bar bar-header bar-assertive-900">
+
+		<div class="buttons buttons-left header-item" ng-if="isTruck()">
+			<span class="left-buttons">
+				<button class="button button-calm button-fab">
+					<i class="icon ion-pinpoint"></i>
+				</button>
+			</span>
+		</div>
+		<div class="h1 title fab-left dark logo">
+			Header
+		</div>
+		<div class="buttons buttons-right header-item">
+			<span class="right-buttons">
+				<button class="button button-icon button-clear ion-android-more-vertical"></button>
+			</span>
+		</div>
+
+	</ion-header-bar>
   
   <ion-content>
     <div id="map" data-tap-disabled="true"></div>
   </ion-content>
 
 </ion-pane>
+
 
 

@@ -1,9 +1,12 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
+    
+    // Ionic Material Ink
+    ionicMaterialInk.displayEffect();
 
     let ref = new Firebase(firebaseURL);
 
@@ -20,6 +23,16 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       }
       console.log("Current User:", currentUser);
     });
+
+    $scope.isTruck = function () {
+      if (currentUser.is_truck) {
+        return true;
+        $scope.$apply();
+      } else {
+        return false;
+        $scope.$apply();
+      }
+    };
 
     var lat;
     var long;
@@ -124,7 +137,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
               }
             }
           );
-        }, 1000 
+        }, 20000 
       );
 
       $scope.map = map;   
