@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, authFactory, firebaseURL) {
+app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, ionicMaterialMotion,authFactory, firebaseURL) {
   
   let ref = new Firebase(firebaseURL);
 
@@ -62,6 +62,36 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
     $scope.$on('$destroy', function() {
       $scope.modal.remove();
     });
+
+    var reset = function() {
+      var inClass = document.querySelectorAll('.in');
+      for (var i = 0; i < inClass.length; i++) {
+        inClass[i].classList.remove('in');
+        inClass[i].removeAttribute('style');
+      }
+      
+      var done = document.querySelectorAll('.done');
+      for (var i = 0; i < done.length; i++) {
+        done[i].classList.remove('done');
+        done[i].removeAttribute('style');
+      }
+      
+      var ionList = $('#ripple-list').children();
+      for (var i = 0; i < ionList.length; i++) {
+        var toRemove = ionList[i].className;
+        if (/animate-/.test(toRemove)) {
+          ionList[i].className = ionList[i].className.replace(/(?:^|\s)animate-\S*(?:$|\s)/, '');
+        }
+      }
+    };
+
+    $scope.ripple = function() {
+      reset();
+      document.getElementsByTagName('ion-list')[0].className += ' animate-ripple';
+      setTimeout(function() {
+        ionicMaterialMotion.ripple();
+      }, 500);
+    };
 
   // End ionicPlatform.ready()
   });
