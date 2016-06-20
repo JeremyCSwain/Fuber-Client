@@ -1,9 +1,12 @@
 "use strict";
 
 
-app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, firebaseURL, authFactory) {
+app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, ionicMaterialInk, firebaseURL, authFactory) {
      
-  $ionicPlatform.ready(function() {    
+  $ionicPlatform.ready(function() {   
+
+    // Ionic Material Ink
+    ionicMaterialInk.displayEffect(); 
 
     let ref = new Firebase(firebaseURL);
 
@@ -36,6 +39,17 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         }
       }
     );
+
+    // Checks if current user is a food truck user or not
+    $scope.isTruck = function () {
+      if (currentUser.is_truck) {
+        return true;
+        $scope.$apply();
+      } else {
+        return false;
+        $scope.$apply();
+      }
+    };
 
     var lat;
     var long;
@@ -71,6 +85,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         var mapOptions = {
           center: myLatLng,
           zoom: 16,
+          mapTypeControl: false,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };  
         

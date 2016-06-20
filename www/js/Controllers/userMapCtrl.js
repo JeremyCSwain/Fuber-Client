@@ -1,10 +1,10 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicPopover, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
-    
+
     // Ionic Material Ink
     ionicMaterialInk.displayEffect();
 
@@ -24,6 +24,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       console.log("Current User:", currentUser);
     });
 
+    // Checks if current user is a food truck user or not
     $scope.isTruck = function () {
       if (currentUser.is_truck) {
         return true;
@@ -61,20 +62,12 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       var mapOptions = {
         center: myLatLng,
         zoom: 16,
+        mapTypeControl: false,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };  
       
       // Open New Google Map
       var map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
-      // Drop marker on user's location
-      var userMarker = new google.maps.Marker({
-        position: new google.maps.LatLng(lat, long),
-        map: map
-      });
-
-      // Update Marker
-      userMarker.setPosition(myLatLng)
 
       // Set empty array for all truck coords.
       let allCoords = [];
