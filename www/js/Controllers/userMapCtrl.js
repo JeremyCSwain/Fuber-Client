@@ -71,7 +71,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
 
       // Set empty array for all truck coords.
       var allTrucks = [];
-      var infowindow;
+      var infowindow = new google.maps.InfoWindow();
       var truckMarker;
       var markerContent = [];
 
@@ -95,23 +95,20 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       .then(
         function () {
           for (var i = 0; i < allTrucks.length; i++) { 
-            // var currPosition = new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long);
             truckMarker = new google.maps.Marker({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               map: map,
               icon: `img/truck_icon.png`
             });
-            markerContent.push(`<div>${allTrucks[i]}</div>`);
-            console.log("??", markerContent);
             
-            infowindow = new google.maps.InfoWindow({
+            truckMarker.info = new google.maps.InfoWindow({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
-              // content: markerContent[i].contact_info
+              content: `<div>Hi ${[i]}</div>`
             });
             
             google.maps.event.addListener(truckMarker, 'click', function() {
-              infowindow.setContent(markerContent.contact_info);
-              infowindow.open(map, this);
+              // infowindow.setContent(infowindow[i].content);
+              this.info.open(map, this);
             });    
           }
         }
