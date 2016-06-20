@@ -8,14 +8,14 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
     // Ionic Material Ink
     ionicMaterialInk.displayEffect(); 
 
-    let ref = new Firebase(firebaseURL);
+    var ref = new Firebase(firebaseURL);
 
-    let currentUser = {};
-    let currentTruck = {};
+    var currentUser = {};
+    var currentTruck = {};
 
     // If user isAuthorized, get users and set current user based on uid.
-    authFactory.getUser().then(UserObj => {
-      let authData = ref.getAuth();
+    authFactory.getUser().then(function (UserObj) {
+      var authData = ref.getAuth();
       for (var i = 0; i < UserObj.length; i++) {
         if(UserObj[i].firebaseUID == authData.uid) {
           currentUser = UserObj[i];
@@ -28,7 +28,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
     // Get current User's truck_user data for location update.
       function () {
         if (currentUser.is_truck) {
-          authFactory.getTruck().then(TruckObj => {
+          authFactory.getTruck().then(function (TruckObj) {
             for (var i = 0; i < TruckObj.length; i++) {
               if(TruckObj[i].firebaseUID == currentUser.firebaseUID) {
                 currentTruck = TruckObj[i];
@@ -56,7 +56,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
 
     // Preloader
     $ionicLoading.show({
-      template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
+      template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
      
     var watchOptions = {
@@ -111,70 +111,6 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
             )
           }, 20000
         );
-
-        // // If pulling in all truck locs, set empty array for coords.
-        // let allCoords = [];
-        // let truckMarker;
-
-        // // Get all truck locs, then refresh on setInterval
-        // $scope.getAllTrucks = function () {
-        //   return new Promise(function (resolve, reject) {
-        //     $http.get(`http://localhost:3000/api/truck_user`)
-        //     .success(
-        //       allCoordsObj => resolve(allCoordsObj),
-        //       error => reject(error)
-        //     )
-        //   })
-        // };
-        // // Invoke GET
-        // $scope.getAllTrucks().then(
-        //   allCoordsObj => {
-        //     allCoords = allCoordsObj;
-        //     console.log("All Truck User Coords:", allCoords);
-        //   }
-        // )
-        // .then(
-        //   function () {
-        //     for (var i = 0; i < allCoords.length; i++) {  
-        //       truckMarker = new google.maps.Marker({
-        //         position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
-        //         map: map,
-        //         icon: `img/truck_icon.png`
-        //       });
-        //     }
-        //   }
-        // );
-        
-        // // Begin marker refresh of truck locs on setInterval
-        // window.setInterval(
-        //   function () {
-        //     // GET all truck locations
-        //     $scope.getAllTrucks = function () {
-        //       return new Promise(function (resolve, reject) {
-        //         $http.get(`http://localhost:3000/api/truck_user`)
-        //         .success(
-        //           allCoordsObj => resolve(allCoordsObj),
-        //           error => reject(error)
-        //         )
-        //       })
-        //     };
-        //     // Invoke GET
-        //     $scope.getAllTrucks().then(
-        //       allCoordsObj => {
-        //         allCoords = allCoordsObj;
-        //         console.log("All Truck User Coords:", allCoords);
-        //       }
-        //     )
-        //     .then(
-        //       function () {
-        //         for (var i = 0; i < allCoords.length; i++) {
-        //           let currTruckCoord = new google.maps.LatLng(allCoords[i].lat, allCoords[i].long);
-        //           truckMarker.setPosition(currTruckCoord);
-        //         }
-        //       }
-        //     );
-        //   }, 1000 
-        // );
 
         $scope.map = map;   
         $ionicLoading.hide();     
