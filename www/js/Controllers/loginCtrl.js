@@ -3,7 +3,7 @@
 
 app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, ionicMaterialMotion,authFactory, firebaseURL) {
   
-  let ref = new Firebase(firebaseURL);
+  var ref = new Firebase(firebaseURL);
 
   $ionicPlatform.ready(function() {
 

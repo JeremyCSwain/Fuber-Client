@@ -1,11 +1,12 @@
 "use strict";
 
 
-let app = angular.module('Fuber', ['ionic', 'ionic-material', 'ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
+var app = angular.module('Fuber', ['ionic', 'ionic-material', 'ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
 
 
 // Creates a promise for each view that requires user authentication before resolving.
-let isAuth = (authFactory) => new Promise(function (resolve, reject) {
+var isAuth = function (authFactory) {
+  new Promise (function (resolve, reject) {
   if (authFactory.isAuthenticated()) {
     console.log("User is authenticated, resolve route promise.");
     resolve();
@@ -13,7 +14,7 @@ let isAuth = (authFactory) => new Promise(function (resolve, reject) {
     console.log("User is not authenticated, reject route promise.");
     reject();
   }
-});
+})};
 
 // Routings for partials and their controllers for user views.
 app.config(["$routeProvider",
@@ -52,10 +53,10 @@ app.run(function($ionicPlatform, $location, firebaseURL) {
     }
   });
   // If a change in authorization happens, redirect to login
-  let appRef = new Firebase(firebaseURL);
+  var appRef = new Firebase(firebaseURL);
 
   // If user is unauthenticated, reroute to login page.
-  appRef.onAuth(authData => {
+  appRef.onAuth(function (authData) {
     if (!authData) {
       console.log("Unauthenticated user.");
       $location.path("/login");

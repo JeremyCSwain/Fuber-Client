@@ -8,13 +8,13 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
     // Ionic Material Ink
     ionicMaterialInk.displayEffect();
 
-    let ref = new Firebase(firebaseURL);
+    var ref = new Firebase(firebaseURL);
 
-    let currentUser = {};  
+    var currentUser = {};  
 
     // If user isAuthorized, get users and set current user based on uid.
-    authFactory.getUser().then(UserObj => {
-      let authData = ref.getAuth();
+    authFactory.getUser().then(function (UserObj) {
+      var authData = ref.getAuth();
       for (var i = 0; i < UserObj.length; i++) {
         if(UserObj[i].firebaseUID == authData.uid) {
           currentUser = UserObj[i];
@@ -40,7 +40,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
 
     // Preloader
     $ionicLoading.show({
-      template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
+      template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
      
     var posOptions = {
@@ -70,37 +70,57 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
       // Set empty array for all truck coords.
-      let allCoords = [];
-      let truckMarker;
+      var allTrucks = [];
+      var infowindow;
+      var truckMarker;
+      var markerContent = [];
 
       // Get all truck locs, then refresh on setInterval
       $scope.getAllTrucks = function () {
         return new Promise(function (resolve, reject) {
           $http.get(`http://localhost:3000/api/truck_user`)
           .success(
-            allCoordsObj => resolve(allCoordsObj),
-            error => reject(error)
+            function (allTrucksObj) {resolve(allTrucksObj)},
+            function (error) {reject(error)}
           )
         })
       };
       // Invoke GET
       $scope.getAllTrucks().then(
-        allCoordsObj => {
-          allCoords = allCoordsObj;
-          console.log("All Truck User Coords:", allCoords);
+        function (allTrucksObj) {
+          allTrucks = allTrucksObj;
+          console.log("All Truck Users:", allTrucks);
         }
       )
       .then(
         function () {
-          for (var i = 0; i < allCoords.length; i++) {  
+          for (var i = 0; i < allTrucks.length; i++) { 
+            // var currPosition = new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long);
             truckMarker = new google.maps.Marker({
-              position: new google.maps.LatLng(allCoords[i].lat, allCoords[i].long),
+              position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               map: map,
               icon: `img/truck_icon.png`
             });
+            markerContent.push(`<div>${allTrucks[i]}</div>`);
+            console.log("??", markerContent);
+            
+            infowindow = new google.maps.InfoWindow({
+              position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
+              // content: markerContent[i].contact_info
+            });
+            
+            google.maps.event.addListener(truckMarker, 'click', function() {
+              infowindow.setContent(markerContent.contact_info);
+              infowindow.open(map, this);
+            });    
           }
         }
       );
+
+      google.maps.event.addListener(map, 'click', function() {
+        infowindow.close();
+      });
+      
 
       // Begin marker refresh of truck locs on setInterval
       window.setInterval(
@@ -110,22 +130,22 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
             return new Promise(function (resolve, reject) {
               $http.get(`http://localhost:3000/api/truck_user`)
               .success(
-                allCoordsObj => resolve(allCoordsObj),
-                error => reject(error)
+                function (allTrucksObj) {resolve(allTrucksObj)},
+                function (error) {reject(error)}
               )
             })
           };
           // Invoke GET
           $scope.getAllTrucks().then(
-            allCoordsObj => {
-              allCoords = allCoordsObj;
-              console.log("All Truck User Coords:", allCoords);
+            function (allTrucksObj) {
+              allTrucks = allTrucksObj;
+              console.log("All Truck User Coords:", allTrucks);
             }
           )
           .then(
             function () {
-              for (var i = 0; i < allCoords.length; i++) {
-                let currTruckCoord = new google.maps.LatLng(allCoords[i].lat, allCoords[i].long);
+              for (var i = 0; i < allTrucks.length; i++) {
+                var currTruckCoord = new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long);
                 truckMarker.setPosition(currTruckCoord);
               }
             }

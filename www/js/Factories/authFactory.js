@@ -1,14 +1,15 @@
 "use strict";
 
+
 app.factory("authFactory", function ($http, firebaseURL) {
 
-  let ref = new Firebase(firebaseURL);
+  var ref = new Firebase(firebaseURL);
 
   return {
 
     // Checks if user is authenticated.
     isAuthenticated () {
-      let authData = ref.getAuth();
+      var authData = ref.getAuth();
       if (authData) {
         return true;    
       } else {
@@ -21,8 +22,8 @@ app.factory("authFactory", function ($http, firebaseURL) {
       return new Promise(function (resolve, reject) {
         $http.get(`http://localhost:3000/api/users/`)
         .success(
-          userObj => resolve(userObj),
-          error => reject(error)
+          function (userObj) {resolve(userObj)},
+          function (error) {reject(error)}
         )
       });
     },
@@ -32,8 +33,8 @@ app.factory("authFactory", function ($http, firebaseURL) {
     	return new Promise(function (resolve, reject) {
  				$http.get(`http://localhost:3000/api/truck_user`)
  				.success(
- 					truckObj => resolve(truckObj),
- 					error => reject(error)
+ 					function (truckObj) {resolve(truckObj)},
+ 					function (error) {reject(error)}
  				)  		
     	});
     },
@@ -58,7 +59,7 @@ app.factory("authFactory", function ($http, firebaseURL) {
 
     // Upon registration, storeUser() creates an object within the user_data object that contains the uid, userName, and user auth status.
     storeUser (firebaseUid, account, user) {
-    	let userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
+    	var userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
       userRef.set({
         uid: firebaseUid,
         email: account.email,
