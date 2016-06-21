@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicPopover, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
 
@@ -72,8 +72,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       // Set empty array for all truck coords.
       var allTrucks = [];
       var infowindow = new google.maps.InfoWindow();
-      var truckMarker;
-      var markerContent = [];
+      var truckMarker = new google.maps.Marker();
 
       // Get all truck locs, then refresh on setInterval
       $scope.getAllTrucks = function () {
@@ -89,6 +88,9 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       $scope.getAllTrucks().then(
         function (allTrucksObj) {
           allTrucks = allTrucksObj;
+          if (allTrucks.length == 0) {
+            alert("There are currently active trucks!");
+          }
           console.log("All Truck Users:", allTrucks);
         }
       )
@@ -103,11 +105,16 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
             
             truckMarker.info = new google.maps.InfoWindow({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
-              content: `<div>Hi ${[i]}</div>`
+              content: 
+                `<div>
+                  <p>${allTrucks[i].truck_name}</p>
+                  <p>Style: ${allTrucks[i].cuisine}</p>
+                  <p><a href="tel:+1-1${allTrucks[i].contact_info}">Place an Order</a></p>
+                  <p><a href="${allTrucks[i].website_url}">More Info</a></p>
+                </div>`
             });
             
             google.maps.event.addListener(truckMarker, 'click', function() {
-              // infowindow.setContent(infowindow[i].content);
               this.info.open(map, this);
             });    
           }
