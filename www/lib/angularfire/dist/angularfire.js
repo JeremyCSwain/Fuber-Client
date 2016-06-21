@@ -4,9 +4,9 @@
  * provides you with the $firebase service which allows you to easily keep your $scope
  * variables in sync with your Firebase backend.
  *
- * AngularFire 2.0.1
+ * AngularFire 1.1.4
  * https://github.com/firebase/angularfire/
- * Date: 06/02/2016
+ * Date: 02/22/2016
  * License: MIT
  */
 (function(exports) {
@@ -130,25 +130,12 @@
          */
         $add: function(data) {
           this._assertNotDestroyed('$add');
-          var self = this;
-          var def = $q.defer();
-          var ref = this.$ref().ref.push();
-          var dataJSON;
-
-          try {
-            dataJSON = $firebaseUtils.toJSON(data);
-          } catch (err) {
-            def.reject(err);
-          }
-
-          if (typeof dataJSON !== 'undefined') {
-            $firebaseUtils.doSet(ref, dataJSON).then(function() {
-              self.$$notify('child_added', ref.key);
-              def.resolve(ref);
-            }).catch(def.reject);
-          }
-
-          return def.promise;
+          var def = $firebaseUtils.defer();
+          var ref = this.$ref().ref().push();
+          ref.set($firebaseUtils.toJSON(data), $firebaseUtils.makeNodeResolver(def));
+          return def.promise.then(function() {
+            return ref;
+          });
         },
 
         /**
@@ -170,30 +157,17 @@
           var self = this;
           var item = self._resolveItem(indexOrItem);
           var key = self.$keyAt(item);
-          var def = $q.defer();
-
           if( key !== null ) {
-            var ref = self.$ref().ref.child(key);
-            var dataJSON;
-
-            try {
-              dataJSON = $firebaseUtils.toJSON(item);
-            } catch (err) {
-              def.reject(err);
-            }
-
-            if (typeof dataJSON !== 'undefined') {
-              $firebaseUtils.doSet(ref, dataJSON).then(function() {
-                self.$$notify('child_changed', key);
-                def.resolve(ref);
-              }).catch(def.reject);
-            }
+            var ref = self.$ref().ref().child(key);
+            var data = $firebaseUtils.toJSON(item);
+            return $firebaseUtils.doSet(ref, data).then(function() {
+              self.$$notify('child_changed', key);
+              return ref;
+            });
           }
           else {
-            def.reject('Invalid record; could not determine key for '+indexOrItem);
+            return $firebaseUtils.reject('Invalid record; could determine key for '+indexOrItem);
           }
-
-          return def.promise;
         },
 
         /**
@@ -214,13 +188,13 @@
           this._assertNotDestroyed('$remove');
           var key = this.$keyAt(indexOrItem);
           if( key !== null ) {
-            var ref = this.$ref().ref.child(key);
+            var ref = this.$ref().ref().child(key);
             return $firebaseUtils.doRemove(ref).then(function() {
               return ref;
             });
           }
           else {
-            return $q.reject('Invalid record; could not determine key for '+indexOrItem);
+            return $firebaseUtils.reject('Invalid record; could not determine key for '+indexOrItem);
           }
         },
 
@@ -352,14 +326,14 @@
          */
         $$added: function(snap/*, prevChild*/) {
           // check to make sure record does not exist
-          var i = this.$indexFor(snap.key);
+          var i = this.$indexFor($firebaseUtils.getKey(snap));
           if( i === -1 ) {
             // parse data and create record
             var rec = snap.val();
             if( !angular.isObject(rec) ) {
               rec = { $value: rec };
             }
-            rec.$id = snap.key;
+            rec.$id = $firebaseUtils.getKey(snap);
             rec.$priority = snap.getPriority();
             $firebaseUtils.applyDefaults(rec, this.$$defaults);
 
@@ -379,7 +353,7 @@
          * @protected
          */
         $$removed: function(snap) {
-          return this.$indexFor(snap.key) > -1;
+          return this.$indexFor($firebaseUtils.getKey(snap)) > -1;
         },
 
         /**
@@ -397,7 +371,7 @@
          */
         $$updated: function(snap) {
           var changed = false;
-          var rec = this.$getRecord(snap.key);
+          var rec = this.$getRecord($firebaseUtils.getKey(snap));
           if( angular.isObject(rec) ) {
             // apply changes to the record
             changed = $firebaseUtils.updateRec(rec, snap);
@@ -421,7 +395,7 @@
          * @protected
          */
         $$moved: function(snap/*, prevChild*/) {
-          var rec = this.$getRecord(snap.key);
+          var rec = this.$getRecord($firebaseUtils.getKey(snap));
           if( angular.isObject(rec) ) {
             rec.$priority = snap.getPriority();
             return true;
@@ -660,7 +634,7 @@
           // determine when initial load is completed
           ref.once('value', function(snap) {
             if (angular.isArray(snap.val())) {
-              $log.warn('Storing data using array indices in Firebase can result in unexpected behavior. See https://firebase.google.com/docs/database/web/structure-data for more information.');
+              $log.warn('Storing data using array indices in Firebase can result in unexpected behavior. See https://www.firebase.com/docs/web/guide/understanding-data.html#section-arrays-in-firebase for more information.');
             }
 
             initComplete(null, $list);
@@ -676,20 +650,14 @@
           }
         }
 
-        var def = $q.defer();
+        var def     = $firebaseUtils.defer();
         var created = function(snap, prevChild) {
-          if (!firebaseArray) {
-            return;
-          }
           waitForResolution(firebaseArray.$$added(snap, prevChild), function(rec) {
             firebaseArray.$$process('child_added', rec, prevChild);
           });
         };
         var updated = function(snap) {
-          if (!firebaseArray) {
-            return;
-          }
-          var rec = firebaseArray.$getRecord(snap.key);
+          var rec = firebaseArray.$getRecord($firebaseUtils.getKey(snap));
           if( rec ) {
             waitForResolution(firebaseArray.$$updated(snap), function() {
               firebaseArray.$$process('child_changed', rec);
@@ -697,10 +665,7 @@
           }
         };
         var moved   = function(snap, prevChild) {
-          if (!firebaseArray) {
-            return;
-          }
-          var rec = firebaseArray.$getRecord(snap.key);
+          var rec = firebaseArray.$getRecord($firebaseUtils.getKey(snap));
           if( rec ) {
             waitForResolution(firebaseArray.$$moved(snap, prevChild), function() {
               firebaseArray.$$process('child_moved', rec, prevChild);
@@ -708,10 +673,7 @@
           }
         };
         var removed = function(snap) {
-          if (!firebaseArray) {
-            return;
-          }
-          var rec = firebaseArray.$getRecord(snap.key);
+          var rec = firebaseArray.$getRecord($firebaseUtils.getKey(snap));
           if( rec ) {
             waitForResolution(firebaseArray.$$removed(snap), function() {
                firebaseArray.$$process('child_removed', rec);
@@ -780,30 +742,24 @@
       /**
        * This factory returns an object allowing you to manage the client's authentication state.
        *
-       * @param {Firebase.auth.Auth} auth A Firebase auth instance to authenticate.
+       * @param {Firebase} ref A Firebase reference to authenticate.
        * @return {object} An object containing methods for authenticating clients, retrieving
        * authentication state, and managing users.
        */
-      return function(auth) {
-        auth = auth || firebase.auth();
-
-        var firebaseAuth = new FirebaseAuth($q, $firebaseUtils, auth);
-        return firebaseAuth.construct();
+      return function(ref) {
+        var auth = new FirebaseAuth($q, $firebaseUtils, ref);
+        return auth.construct();
       };
     }
   ]);
 
-  FirebaseAuth = function($q, $firebaseUtils, auth) {
+  FirebaseAuth = function($q, $firebaseUtils, ref) {
     this._q = $q;
     this._utils = $firebaseUtils;
-
-    if (typeof auth === 'string') {
-      throw new Error('The $firebaseAuth service accepts a Firebase auth instance (or nothing) instead of a URL.');
-    } else if (typeof auth.ref !== 'undefined') {
-      throw new Error('The $firebaseAuth service accepts a Firebase auth instance (or nothing) instead of a Database reference.');
+    if (typeof ref === 'string') {
+      throw new Error('Please provide a Firebase reference instead of a URL when creating a `$firebaseAuth` object.');
     }
-
-    this._auth = auth;
+    this._ref = ref;
     this._initialAuthResolver = this._initAuthResolver();
   };
 
@@ -811,29 +767,26 @@
     construct: function() {
       this._object = {
         // Authentication methods
-        $signInWithCustomToken: this.signInWithCustomToken.bind(this),
-        $signInAnonymously: this.signInAnonymously.bind(this),
-        $signInWithEmailAndPassword: this.signInWithEmailAndPassword.bind(this),
-        $signInWithPopup: this.signInWithPopup.bind(this),
-        $signInWithRedirect: this.signInWithRedirect.bind(this),
-        $signInWithCredential: this.signInWithCredential.bind(this),
-        $signOut: this.signOut.bind(this),
+        $authWithCustomToken: this.authWithCustomToken.bind(this),
+        $authAnonymously: this.authAnonymously.bind(this),
+        $authWithPassword: this.authWithPassword.bind(this),
+        $authWithOAuthPopup: this.authWithOAuthPopup.bind(this),
+        $authWithOAuthRedirect: this.authWithOAuthRedirect.bind(this),
+        $authWithOAuthToken: this.authWithOAuthToken.bind(this),
+        $unauth: this.unauth.bind(this),
 
         // Authentication state methods
-        $onAuthStateChanged: this.onAuthStateChanged.bind(this),
+        $onAuth: this.onAuth.bind(this),
         $getAuth: this.getAuth.bind(this),
-        $requireSignIn: this.requireSignIn.bind(this),
-        $waitForSignIn: this.waitForSignIn.bind(this),
+        $requireAuth: this.requireAuth.bind(this),
+        $waitForAuth: this.waitForAuth.bind(this),
 
         // User management methods
-        $createUserWithEmailAndPassword: this.createUserWithEmailAndPassword.bind(this),
-        $updatePassword: this.updatePassword.bind(this),
-        $updateEmail: this.updateEmail.bind(this),
-        $deleteUser: this.deleteUser.bind(this),
-        $sendPasswordResetEmail: this.sendPasswordResetEmail.bind(this),
-
-        // Hack: needed for tests
-        _: this
+        $createUser: this.createUser.bind(this),
+        $changePassword: this.changePassword.bind(this),
+        $changeEmail: this.changeEmail.bind(this),
+        $removeUser: this.removeUser.bind(this),
+        $resetPassword: this.resetPassword.bind(this)
       };
 
       return this._object;
@@ -850,68 +803,133 @@
      * @param {string} authToken An authentication token or a Firebase Secret. A Firebase Secret
      * should only be used for authenticating a server process and provides full read / write
      * access to the entire Firebase.
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInWithCustomToken: function(authToken) {
-      return this._q.when(this._auth.signInWithCustomToken(authToken));
+    authWithCustomToken: function(authToken, options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authWithCustomToken(authToken, this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Authenticates the Firebase reference anonymously.
      *
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInAnonymously: function() {
-      return this._q.when(this._auth.signInAnonymously());
+    authAnonymously: function(options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authAnonymously(this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Authenticates the Firebase reference with an email/password user.
      *
-     * @param {String} email An email address for the new user.
-     * @param {String} password A password for the new email.
+     * @param {Object} credentials An object containing email and password attributes corresponding
+     * to the user account.
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInWithEmailAndPassword: function(email, password) {
-      return this._q.when(this._auth.signInWithEmailAndPassword(email, password));
+    authWithPassword: function(credentials, options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authWithPassword(credentials, this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Authenticates the Firebase reference with the OAuth popup flow.
      *
-     * @param {object|string} provider A firebase.auth.AuthProvider or a unique provider ID like 'facebook'.
+     * @param {string} provider The unique string identifying the OAuth provider to authenticate
+     * with, e.g. google.
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInWithPopup: function(provider) {
-      return this._q.when(this._auth.signInWithPopup(this._getProvider(provider)));
+    authWithOAuthPopup: function(provider, options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authWithOAuthPopup(provider, this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Authenticates the Firebase reference with the OAuth redirect flow.
      *
-     * @param {object|string} provider A firebase.auth.AuthProvider or a unique provider ID like 'facebook'.
+     * @param {string} provider The unique string identifying the OAuth provider to authenticate
+     * with, e.g. google.
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInWithRedirect: function(provider) {
-      return this._q.when(this._auth.signInWithRedirect(this._getProvider(provider)));
+    authWithOAuthRedirect: function(provider, options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authWithOAuthRedirect(provider, this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Authenticates the Firebase reference with an OAuth token.
      *
-     * @param {firebase.auth.AuthCredential} credential The Firebase credential.
+     * @param {string} provider The unique string identifying the OAuth provider to authenticate
+     * with, e.g. google.
+     * @param {string|Object} credentials Either a string, such as an OAuth 2.0 access token, or an
+     * Object of key / value pairs, such as a set of OAuth 1.0a credentials.
+     * @param {Object} [options] An object containing optional client arguments, such as configuring
+     * session persistence.
      * @return {Promise<Object>} A promise fulfilled with an object containing authentication data.
      */
-    signInWithCredential: function(credential) {
-      return this._q.when(this._auth.signInWithCredential(credential));
+    authWithOAuthToken: function(provider, credentials, options) {
+      var deferred = this._q.defer();
+
+      try {
+        this._ref.authWithOAuthToken(provider, credentials, this._utils.makeNodeResolver(deferred), options);
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Unauthenticates the Firebase reference.
      */
-    signOut: function() {
+    unauth: function() {
       if (this.getAuth() !== null) {
-        this._auth.signOut();
+        this._ref.unauth();
       }
     },
 
@@ -929,15 +947,18 @@
      * data according to the provider used to authenticate. Otherwise, it will be passed null.
      * @param {string} [context] If provided, this object will be used as this when calling your
      * callback.
-     * @return {Promise<Function>} A promised fulfilled with a function which can be used to
-     * deregister the provided callback.
+     * @return {function} A function which can be used to deregister the provided callback.
      */
-    onAuthStateChanged: function(callback, context) {
-      var fn = this._utils.debounce(callback, context, 0);
-      var off = this._auth.onAuthStateChanged(fn);
+    onAuth: function(callback, context) {
+      var self = this;
 
-      // Return a method to detach the `onAuthStateChanged()` callback.
-      return off;
+      var fn = this._utils.debounce(callback, context, 0);
+      this._ref.onAuth(fn);
+
+      // Return a method to detach the `onAuth()` callback.
+      return function() {
+        self._ref.offAuth(fn);
+      };
     },
 
     /**
@@ -946,11 +967,11 @@
      * @return {Object} The client's authentication data.
      */
     getAuth: function() {
-      return this._auth.currentUser;
+      return this._ref.getAuth();
     },
 
     /**
-     * Helper onAuthStateChanged() callback method for the two router-related methods.
+     * Helper onAuth() callback method for the two router-related methods.
      *
      * @param {boolean} rejectIfAuthDataIsNull Determines if the returned promise should be
      * resolved or rejected upon an unauthenticated client.
@@ -958,40 +979,22 @@
      * rejected if the client is unauthenticated and rejectIfAuthDataIsNull is true.
      */
     _routerMethodOnAuthPromise: function(rejectIfAuthDataIsNull) {
-      var self = this;
-
+      var ref = this._ref, utils = this._utils;
       // wait for the initial auth state to resolve; on page load we have to request auth state
       // asynchronously so we don't want to resolve router methods or flash the wrong state
       return this._initialAuthResolver.then(function() {
         // auth state may change in the future so rather than depend on the initially resolved state
         // we also check the auth data (synchronously) if a new promise is requested, ensuring we resolve
         // to the current auth state and not a stale/initial state
-        var authData = self.getAuth(), res = null;
+        var authData = ref.getAuth(), res = null;
         if (rejectIfAuthDataIsNull && authData === null) {
-          res = self._q.reject("AUTH_REQUIRED");
+          res = utils.reject("AUTH_REQUIRED");
         }
         else {
-          res = self._q.when(authData);
+          res = utils.resolve(authData);
         }
         return res;
       });
-    },
-
-    /**
-     * Helper method to turn provider names into AuthProvider instances
-     *
-     * @param {object} stringOrProvider Provider ID string to AuthProvider instance
-     * @return {firebdase.auth.AuthProvider} A valid AuthProvider instance
-     */
-    _getProvider: function (stringOrProvider) {
-      var provider;
-      if (typeof stringOrProvider == "string") {
-        var providerID = stringOrProvider.slice(0, 1).toUpperCase() + stringOrProvider.slice(1);
-        provider = new firebase.auth[providerID+"AuthProvider"]();
-      } else {
-        provider = stringOrProvider;
-      }
-      return provider;
     },
 
     /**
@@ -1001,16 +1004,14 @@
      * @return {Promise<Object>} A promise fulfilled when the server returns initial auth state.
      */
     _initAuthResolver: function() {
-      var auth = this._auth;
-
-      return this._q(function(resolve) {
-        var off;
+      var ref = this._ref;
+      return this._utils.promise(function(resolve) {
         function callback() {
-          // Turn off this onAuthStateChanged() callback since we just needed to get the authentication data once.
-          off();
+          // Turn off this onAuth() callback since we just needed to get the authentication data once.
+          ref.offAuth(callback);
           resolve();
         }
-        off = auth.onAuthStateChanged(callback);
+        ref.onAuth(callback);
       });
     },
 
@@ -1021,7 +1022,7 @@
      * @returns {Promise<Object>} A promise fulfilled with the client's current authentication
      * state or rejected if the client is not authenticated.
      */
-    requireSignIn: function() {
+    requireAuth: function() {
       return this._routerMethodOnAuthPromise(true);
     },
 
@@ -1032,7 +1033,7 @@
      * @returns {Promise<Object|null>} A promise fulfilled with the client's current authentication
      * state, which will be null if the client is not authenticated.
      */
-    waitForSignIn: function() {
+    waitForAuth: function() {
       return this._routerMethodOnAuthPromise(false);
     },
 
@@ -1045,68 +1046,122 @@
      * wish to log in as the newly created user, call $authWithPassword() after the promise for
      * this method has been resolved.
      *
-     * @param {string} email An email for this user.
-     * @param {string} password A password for this user.
+     * @param {Object} credentials An object containing the email and password of the user to create.
      * @return {Promise<Object>} A promise fulfilled with the user object, which contains the
      * uid of the created user.
      */
-    createUserWithEmailAndPassword: function(email, password) {
-      return this._q.when(this._auth.createUserWithEmailAndPassword(email, password));
+    createUser: function(credentials) {
+      var deferred = this._q.defer();
+
+      // Throw an error if they are trying to pass in separate string arguments
+      if (typeof credentials === "string") {
+        throw new Error("$createUser() expects an object containing 'email' and 'password', but got a string.");
+      }
+
+      try {
+        this._ref.createUser(credentials, this._utils.makeNodeResolver(deferred));
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Changes the password for an email/password user.
      *
-     * @param {string} password A new password for the current user.
+     * @param {Object} credentials An object containing the email, old password, and new password of
+     * the user whose password is to change.
      * @return {Promise<>} An empty promise fulfilled once the password change is complete.
      */
-    updatePassword: function(password) {
-      var user = this.getAuth();
-      if (user) {
-        return this._q.when(user.updatePassword(password));
-      } else {
-        return this._q.reject("Cannot update password since there is no logged in user.");
+    changePassword: function(credentials) {
+      var deferred = this._q.defer();
+
+      // Throw an error if they are trying to pass in separate string arguments
+      if (typeof credentials === "string") {
+        throw new Error("$changePassword() expects an object containing 'email', 'oldPassword', and 'newPassword', but got a string.");
       }
+
+      try {
+        this._ref.changePassword(credentials, this._utils.makeNodeResolver(deferred));
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
      * Changes the email for an email/password user.
      *
-     * @param {String} email The new email for the currently logged in user.
+     * @param {Object} credentials An object containing the old email, new email, and password of
+     * the user whose email is to change.
      * @return {Promise<>} An empty promise fulfilled once the email change is complete.
      */
-    updateEmail: function(email) {
-      var user = this.getAuth();
-      if (user) {
-        return this._q.when(user.updateEmail(email));
-      } else {
-        return this._q.reject("Cannot update email since there is no logged in user.");
+    changeEmail: function(credentials) {
+      var deferred = this._q.defer();
+
+      if (typeof this._ref.changeEmail !== 'function') {
+        throw new Error("$firebaseAuth.$changeEmail() requires Firebase version 2.1.0 or greater.");
+      } else if (typeof credentials === 'string') {
+        throw new Error("$changeEmail() expects an object containing 'oldEmail', 'newEmail', and 'password', but got a string.");
       }
+
+      try {
+        this._ref.changeEmail(credentials, this._utils.makeNodeResolver(deferred));
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
     /**
-     * Deletes the currently logged in user.
+     * Removes an email/password user.
      *
+     * @param {Object} credentials An object containing the email and password of the user to remove.
      * @return {Promise<>} An empty promise fulfilled once the user is removed.
      */
-    deleteUser: function() {
-      var user = this.getAuth();
-      if (user) {
-        return this._q.when(user.delete());
-      } else {
-        return this._q.reject("Cannot delete user since there is no logged in user.");
+    removeUser: function(credentials) {
+      var deferred = this._q.defer();
+
+      // Throw an error if they are trying to pass in separate string arguments
+      if (typeof credentials === "string") {
+        throw new Error("$removeUser() expects an object containing 'email' and 'password', but got a string.");
       }
+
+      try {
+        this._ref.removeUser(credentials, this._utils.makeNodeResolver(deferred));
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     },
 
 
     /**
      * Sends a password reset email to an email/password user.
      *
-     * @param {string} email An email address to send a password reset to.
+     * @param {Object} credentials An object containing the email of the user to send a reset
+     * password email to.
      * @return {Promise<>} An empty promise fulfilled once the reset password email is sent.
      */
-    sendPasswordResetEmail: function(email) {
-      return this._q.when(this._auth.sendPasswordResetEmail(email));
+    resetPassword: function(credentials) {
+      var deferred = this._q.defer();
+
+      // Throw an error if they are trying to pass in a string argument
+      if (typeof credentials === "string") {
+        throw new Error("$resetPassword() expects an object containing 'email', but got a string.");
+      }
+
+      try {
+        this._ref.resetPassword(credentials, this._utils.makeNodeResolver(deferred));
+      } catch (error) {
+        deferred.reject(error);
+      }
+
+      return deferred.promise;
     }
   };
 })();
@@ -1136,8 +1191,8 @@
    * </code></pre>
    */
   angular.module('firebase').factory('$firebaseObject', [
-    '$parse', '$firebaseUtils', '$log', '$q',
-    function($parse, $firebaseUtils, $log, $q) {
+    '$parse', '$firebaseUtils', '$log',
+    function($parse, $firebaseUtils, $log) {
       /**
        * Creates a synchronized object with 2-way bindings between Angular and Firebase.
        *
@@ -1169,7 +1224,7 @@
           value: this.$$conf
         });
 
-        this.$id = ref.ref.key;
+        this.$id = $firebaseUtils.getKey(ref.ref());
         this.$priority = null;
 
         $firebaseUtils.applyDefaults(this, this.$$defaults);
@@ -1186,23 +1241,11 @@
         $save: function () {
           var self = this;
           var ref = self.$ref();
-          var def = $q.defer();
-          var dataJSON;
-
-          try {
-            dataJSON = $firebaseUtils.toJSON(self);
-          } catch (e) {
-            def.reject(e);
-          }
-
-          if (typeof dataJSON !== 'undefined') {
-            $firebaseUtils.doSet(ref, dataJSON).then(function() {
-              self.$$notify();
-              def.resolve(self.$ref());
-            }).catch(def.reject);
-          }
-
-          return def.promise;
+          var data = $firebaseUtils.toJSON(self);
+          return $firebaseUtils.doSet(ref, data).then(function() {
+            self.$$notify();
+            return self.$ref();
+          });
         },
 
         /**
@@ -1353,7 +1396,7 @@
         $$scopeUpdated: function(newData) {
           // we use a one-directional loop to avoid feedback with 3-way bindings
           // since set() is applied locally anyway, this is still performant
-          var def = $q.defer();
+          var def = $firebaseUtils.defer();
           this.$ref().set($firebaseUtils.toJSON(newData), $firebaseUtils.makeNodeResolver(def));
           return def.promise;
         },
@@ -1443,7 +1486,7 @@
               this.key + '; one binding per instance ' +
               '(call unbind method or create another FirebaseObject instance)';
             $log.error(msg);
-            return $q.reject(msg);
+            return $firebaseUtils.reject(msg);
           }
         },
 
@@ -1546,7 +1589,7 @@
           ref.on('value', applyUpdate, error);
           ref.once('value', function(snap) {
             if (angular.isArray(snap.val())) {
-              $log.warn('Storing data using array indices in Firebase can result in unexpected behavior. See https://firebase.google.com/docs/database/web/structure-data for more information. Also note that you probably wanted $firebaseArray and not $firebaseObject.');
+              $log.warn('Storing data using array indices in Firebase can result in unexpected behavior. See https://www.firebase.com/docs/web/guide/understanding-data.html#section-arrays-in-firebase for more information. Also note that you probably wanted $firebaseArray and not $firebaseObject.');
             }
 
             initComplete(null);
@@ -1563,7 +1606,7 @@
         }
 
         var isResolved = false;
-        var def = $q.defer();
+        var def = $firebaseUtils.defer();
         var applyUpdate = $firebaseUtils.batch(function(snap) {
           var changed = firebaseObject.$$updated(snap);
           if( changed ) {
@@ -1614,69 +1657,9 @@
       return function() {
         throw new Error('$firebase has been removed. You may instantiate $firebaseArray and $firebaseObject ' +
         'directly now. For simple write operations, just use the Firebase ref directly. ' +
-        'See the AngularFire 1.0.0 changelog for details: https://github.com/firebase/angularfire/releases/tag/v1.0.0');
+        'See the AngularFire 1.0.0 changelog for details: https://www.firebase.com/docs/web/libraries/angular/changelog.html');
       };
     });
-
-})();
-
-(function() {
-  "use strict";
-
-  function FirebaseAuthService($firebaseAuth) {
-    return $firebaseAuth();
-  }
-  FirebaseAuthService.$inject = ['$firebaseAuth', '$firebaseRef'];
-
-  angular.module('firebase')
-    .factory('$firebaseAuthService', FirebaseAuthService);
-
-})();
-
-(function() {
-  "use strict";
-
-  function FirebaseRef() {
-    this.urls = null;
-    this.registerUrl = function registerUrl(urlOrConfig) {
-
-      if (typeof urlOrConfig === 'string') {
-        this.urls = {};
-        this.urls.default = urlOrConfig;
-      }
-
-      if (angular.isObject(urlOrConfig)) {
-        this.urls = urlOrConfig;
-      }
-
-    };
-
-    this.$$checkUrls = function $$checkUrls(urlConfig) {
-      if (!urlConfig) {
-        return new Error('No Firebase URL registered. Use firebaseRefProvider.registerUrl() in the config phase. This is required if you are using $firebaseAuthService.');
-      }
-      if (!urlConfig.default) {
-        return new Error('No default Firebase URL registered. Use firebaseRefProvider.registerUrl({ default: "https://<my-firebase-app>.firebaseio.com/"}).');
-      }
-    };
-
-    this.$$createRefsFromUrlConfig = function $$createMultipleRefs(urlConfig) {
-      var refs = {};
-      var error = this.$$checkUrls(urlConfig);
-      if (error) { throw error; }
-      angular.forEach(urlConfig, function(value, key) {
-        refs[key] = firebase.database().refFromURL(value);
-      });
-      return refs;
-    };
-
-    this.$get = function FirebaseRef_$get() {
-      return this.$$createRefsFromUrlConfig(this.urls);
-    };
-  }
-
-  angular.module('firebase')
-    .provider('$firebaseRef', FirebaseRef);
 
 })();
 
@@ -1875,6 +1858,29 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
 
     .factory('$firebaseUtils', ["$q", "$timeout", "$rootScope",
       function($q, $timeout, $rootScope) {
+
+        // ES6 style promises polyfill for angular 1.2.x
+        // Copied from angular 1.3.x implementation: https://github.com/angular/angular.js/blob/v1.3.5/src/ng/q.js#L539
+        function Q(resolver) {
+          if (!angular.isFunction(resolver)) {
+            throw new Error('missing resolver function');
+          }
+
+          var deferred = $q.defer();
+
+          function resolveFn(value) {
+            deferred.resolve(value);
+          }
+
+          function rejectFn(reason) {
+            deferred.reject(reason);
+          }
+
+          resolver(resolveFn, rejectFn);
+
+          return deferred.promise;
+        }
+
         var utils = {
           /**
            * Returns a function which, each time it is invoked, will gather up the values until
@@ -1957,8 +1963,8 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
 
           assertValidRef: function(ref, msg) {
             if( !angular.isObject(ref) ||
-              typeof(ref.ref) !== 'object' ||
-              typeof(ref.ref.transaction) !== 'function' ) {
+              typeof(ref.ref) !== 'function' ||
+              typeof(ref.ref().transaction) !== 'function' ) {
               throw new Error(msg || 'Invalid Firebase reference');
             }
           },
@@ -2003,13 +2009,21 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
             });
           },
 
+          defer: $q.defer,
+
+          reject: $q.reject,
+
+          resolve: $q.when,
+
+          //TODO: Remove false branch and use only angular implementation when we drop angular 1.2.x support.
+          promise: angular.isFunction($q) ? $q : Q,
+
           makeNodeResolver:function(deferred){
             return function(err,result){
               if(err === null){
                 if(arguments.length > 2){
                   result = Array.prototype.slice.call(arguments,1);
                 }
-
                 deferred.resolve(result);
               }
               else {
@@ -2131,6 +2145,16 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
           },
 
           /**
+           * A utility for retrieving a Firebase reference or DataSnapshot's
+           * key name. This is backwards-compatible with `name()` from Firebase
+           * 1.x.x and `key()` from Firebase 2.0.0+. Once support for Firebase
+           * 1.x.x is dropped in AngularFire, this helper can be removed.
+           */
+          getKey: function(refOrSnapshot) {
+            return (typeof refOrSnapshot.key === 'function') ? refOrSnapshot.key() : refOrSnapshot.name();
+          },
+
+          /**
            * A utility for converting records to JSON objects
            * which we can save into Firebase. It asserts valid
            * keys and strips off any items prefixed with $.
@@ -2164,7 +2188,7 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
             }
             angular.forEach(dat, function(v,k) {
               if (k.match(/[.$\[\]#\/]/) && k !== '.value' && k !== '.priority' ) {
-                throw new Error('Invalid key ' + k + ' (cannot contain .$[]#/)');
+                throw new Error('Invalid key ' + k + ' (cannot contain .$[]#)');
               }
               else if( angular.isUndefined(v) ) {
                 throw new Error('Key '+k+' was undefined. Cannot pass undefined in JSON. Use null instead.');
@@ -2174,15 +2198,10 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
           },
 
           doSet: function(ref, data) {
-            var def = $q.defer();
+            var def = utils.defer();
             if( angular.isFunction(ref.set) || !angular.isObject(data) ) {
               // this is not a query, just do a flat set
-              // Use try / catch to handle being passed data which is undefined or has invalid keys
-              try {
-                ref.set(data, utils.makeNodeResolver(def));
-              } catch (err) {
-                def.reject(err);
-              }
+              ref.set(data, utils.makeNodeResolver(def));
             }
             else {
               var dataCopy = angular.extend({}, data);
@@ -2191,11 +2210,11 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
               // the entire Firebase path
               ref.once('value', function(snap) {
                 snap.forEach(function(ss) {
-                  if( !dataCopy.hasOwnProperty(ss.key) ) {
-                    dataCopy[ss.key] = null;
+                  if( !dataCopy.hasOwnProperty(utils.getKey(ss)) ) {
+                    dataCopy[utils.getKey(ss)] = null;
                   }
                 });
-                ref.ref.update(dataCopy, utils.makeNodeResolver(def));
+                ref.ref().update(dataCopy, utils.makeNodeResolver(def));
               }, function(err) {
                 def.reject(err);
               });
@@ -2204,7 +2223,7 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
           },
 
           doRemove: function(ref) {
-            var def = $q.defer();
+            var def = utils.defer();
             if( angular.isFunction(ref.remove) ) {
               // ref is not a query, just do a flat remove
               ref.remove(utils.makeNodeResolver(def));
@@ -2215,7 +2234,9 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
               ref.once('value', function(snap) {
                 var promises = [];
                 snap.forEach(function(ss) {
-                  promises.push(ss.ref.remove());
+                  var d = utils.defer();
+                  promises.push(d.promise);
+                  ss.ref().remove(utils.makeNodeResolver(def));
                 });
                 utils.allPromises(promises)
                   .then(function() {
@@ -2235,7 +2256,7 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
           /**
            * AngularFire version number.
            */
-          VERSION: '2.0.1',
+          VERSION: '1.1.4',
 
           allPromises: $q.all.bind($q)
         };

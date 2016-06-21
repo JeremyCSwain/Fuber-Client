@@ -5,7 +5,8 @@
     "ionic": "driftyco/ionic-bower#1.3.1"
   },
   "dependencies": {
-    "firebase": "^3.0.5"
+    "firebase": "^3.0.5",
+    "IonicOAuthService": "ionic-oauth-service#*"
   },
   "homepage": "https://github.com/JeremyCSwain/Fuber-Client",
   "authors": [
