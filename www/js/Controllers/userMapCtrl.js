@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
 
@@ -33,6 +33,10 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         return false;
         $scope.$apply();
       }
+    };
+
+    $scope.test = function () {
+      console.log("works");
     };
 
     var lat;
@@ -105,12 +109,14 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
             
             truckMarker.info = new google.maps.InfoWindow({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
-              content: 
+              content:
                 `<div>
                   <p>${allTrucks[i].truck_name}</p>
                   <p>Style: ${allTrucks[i].cuisine}</p>
                   <p><a href="tel:+1-1${allTrucks[i].contact_info}">Place an Order</a></p>
                   <p><a href="${allTrucks[i].website_url}">More Info</a></p>
+                  <button id="${allTrucks[i].twitter_handle}" class="button twitter-button">See Twitter Feed</button>
+
                 </div>`
             });
             
@@ -165,6 +171,54 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         console.log(err);
       }
     );
+
+    // User modal partial for twitter feed registration
+    $ionicModal.fromTemplateUrl('../partials/twitter_modal.html', {
+      scope: $scope,
+      animation: 'slide-in-up'
+    }).then(function(modal) {
+      $scope.modal = modal;
+    });
+
+    // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
+    $('#map').on('click', '.twitter-button', function (event) {
+      $scope.modal.show();
+      var twitterHandle = event.currentTarget.id;
+      var twitterQuery = {
+        q: twitterHandle
+      };
+      $scope.getTwitterFeed(twitterQuery).then(function (tweetsObj) {
+        console.log("???", tweetsObj);
+      });
+      console.log("Current Truck Twitter Handle: ", twitterHandle);
+    });
+
+    $scope.openModal = function() {
+      $scope.modal.show();
+    };
+
+    $scope.closeModal = function() {
+      $scope.modal.hide();
+    };
+
+    // Cleanup the modal when we're done with it
+    $scope.$on('$destroy', function() {
+      $scope.modal.remove();
+    });
+
+    $scope.getTwitterFeed = function (twitterQuery) {
+      return new Promise(function (resolve, reject) {
+        $.ajax({
+          url: 'https://api.twitter.com/1.1/search/tweets.json?' + $.param(twitterQuery),
+          dataType: 'jsonp',
+          success: function(tweetsObj) {
+            resolve(tweetsObj)
+          }, function (error) {
+            reject(error)
+          }
+        });
+      });
+    }
 
   // End ionicPlatform.ready
   });
