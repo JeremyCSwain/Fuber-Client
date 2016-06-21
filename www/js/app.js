@@ -1,7 +1,32 @@
 "use strict";
 
 
-var app = angular.module('Fuber', ['ionic', 'ionic-material', 'ngCordova','ngRoute', 'firebase']).constant("firebaseURL", "https://fuber-auth.firebaseio.com/");
+var app = angular.module('Fuber', ['ionic', 'ionic-material', 'ionicOAuthService', 'ngCordova','ngRoute', 'firebase'])
+  
+  .constant("firebaseURL", "https://fuber-auth.firebaseio.com/")
+  .service('UtilityService', ['$ionicPopup', function ($ionicPopup) {
+    
+    this.isNullOrBlank = function (value) {
+      if (value === undefined || value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
+        return true;
+      }
+      if (typeof value === 'object' && Object.keys(value).length === 0) {
+        return true;
+      }
+      return false;
+    };
+
+    this.startsWith = function (fullValue, startsValue) {
+      return fullValue.indexOf(startsValue) === 0;
+    };
+
+    this.showMsg = function(title, message) {
+      $ionicPopup.alert({
+        title: title,
+        template: message
+      });
+    };
+  }]);
 
 
 // Creates a promise for each view that requires user authentication before resolving.
