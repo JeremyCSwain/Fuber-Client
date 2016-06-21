@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, ionicMaterialMotion, OAuthService, SOCIAL, UtilityService, authFactory, firebaseURL) {
+app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, ionicMaterialMotion, ionicMaterialInk, OAuthService, SOCIAL, UtilityService, authFactory, firebaseURL) {
   
   var ref = new Firebase(firebaseURL);
 
@@ -111,7 +111,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 		};
 
 		// User modal partial for new account registration
-		$ionicModal.fromTemplateUrl('../partials/modal.html', {
+		$ionicModal.fromTemplateUrl('../partials/register_modal.html', {
       scope: $scope,
       animation: 'slide-in-up'
     }).then(function(modal) {
