@@ -1,11 +1,11 @@
 "use strict";
 
 
-var app = angular.module('Fuber', ['ionic', 'ionic-material', 'ionicOAuthService', 'ngCordova','ngRoute', 'firebase'])
+var app = angular.module('Fuber', ['ionic', 'ionic-material', 'ionicOAuthService', 'ngCordova', 'ngResource', 'ngRoute', 'firebase'])
   
   .constant("firebaseURL", "https://fuber-auth.firebaseio.com/")
   .service('UtilityService', ['$ionicPopup', function ($ionicPopup) {
-    
+
     this.isNullOrBlank = function (value) {
       if (value === undefined || value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
         return true;

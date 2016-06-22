@@ -71,7 +71,9 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 		};
 
 		$scope.loginSuccessCallback = function(provider, authData) {
-			util.showMsg('Success', JSON.stringify(authData));
+			$location.path("/user-main");
+			$scope.$apply();
+			// util.showMsg('Success', JSON.stringify(authData));
 		};
 
 		$scope.loginErrorCallback = function(provider, error) {
@@ -82,10 +84,10 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 					errorDefaultMsg = "Unable to connect to facebook";
 					errorCancelMsg = "The connection to facebook has been canceled";
 					break;
-				// case SOCIAL.TWITTER.PROVIDER:
-				// 	errorDefaultMsg = "It's not possible to connect with your Twitter";
-				// 	errorCancelMsg = "The connection with your Twitter have been canceled";
-				// 	break;
+				case SOCIAL.TWITTER.PROVIDER:
+					errorDefaultMsg = "Unable to connect to Twitter";
+					errorCancelMsg = "The connection to twitter has been canceled";
+					break;
 				default:
 					break;
 			}

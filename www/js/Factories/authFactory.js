@@ -58,20 +58,20 @@ app.factory("authFactory", function ($http, firebaseURL) {
     },
 
     // Upon registration, storeUser() creates an object within the user_data object that contains the uid, userName, and user auth status.
-    storeUser (firebaseUid, account, user) {
-    	var userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
-      userRef.set({
-        uid: firebaseUid,
-        email: account.email,
-        username: user.username,
-        is_truck: user.is_truck,
-      });
+    storeUser (uid, account, user) {
+    	// var userRef = new Firebase(`${firebaseURL}/user_data/${firebaseUid}`);
+     //  userRef.set({
+     //    uid: firebaseUid,
+     //    email: account.email,
+     //    username: user.username,
+     //    is_truck: user.is_truck,
+     //  });
 	    // If the user is_truck store the user info into the truck_user table data
 	    if (user.is_truck) {
 	    	$http.post(
 	    		`http://localhost:3000/api/truck_user`,
     			JSON.stringify({
-    				firebaseUID: firebaseUid,
+    				uid: uid,
     				truck_name: user.truck_name,
     				cuisine: user.cuisine,
     				contact_info: user.contact_info,
@@ -84,7 +84,7 @@ app.factory("authFactory", function ($http, firebaseURL) {
     	$http.post(
     		`http://localhost:3000/api/users`,
     		JSON.stringify({
-    			firebaseUID: firebaseUid,
+    			uid: uid,
     			email: account.email,
     			username: user.username,
     			is_truck: user.is_truck

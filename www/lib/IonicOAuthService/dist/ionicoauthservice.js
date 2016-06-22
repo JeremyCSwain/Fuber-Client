@@ -21,6 +21,7 @@ angular.module("ionicOAuthService.firebase", ['ionicOAuthService.config', 'fireb
 		});
 	};
 }]);
+
 angular.module("ionicOAuthService.ionicOAuth", ['ngCordovaOauth', 'ionicOAuthService.config', 'ionicOAuthService.firebase'])
 
 .service('OAuthService', ['$cordovaOauth', 'FirebaseService', 'SOCIAL', function ($cordovaOauth, FirebaseService, SOCIAL) {
@@ -69,17 +70,17 @@ angular.module("ionicOAuthService.ionicOAuth", ['ngCordovaOauth', 'ionicOAuthSer
 			// 	});
 			// 	break;
 
-			// case SOCIAL.TWITTER.PROVIDER:
-			// 	cordovaOauth.twitter(SOCIAL.TWITTER.KEY, SOCIAL.TWITTER.SECRET).then(function(fbToken) {
-			// 		auth.$authWithOAuthToken(provider, fbToken).then(function(authData) {
-			// 			successCallback(provider, authData);
-			// 		}, function(error) {
-			// 			errorCallback(provider, error);
-			// 		});
-			// 	}, function(error) {
-			// 		errorCallback(provider, error);
-			// 	});
-			// 	break;
+			case SOCIAL.TWITTER.PROVIDER:
+				cordovaOauth.twitter(SOCIAL.TWITTER.KEY, SOCIAL.TWITTER.SECRET).then(function(fbToken) {
+					auth.$authWithOAuthToken(provider, fbToken).then(function(authData) {
+						successCallback(provider, authData);
+					}, function(error) {
+						errorCallback(provider, error);
+					});
+				}, function(error) {
+					errorCallback(provider, error);
+				});
+				break;
 
 			default:
 				errorCallback(provider, SOCIAL.INVALID_PROVIDER);

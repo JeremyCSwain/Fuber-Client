@@ -7,11 +7,11 @@ angular.module('ionicOAuthService.config', [])
 	FACEBOOK: {
 		PROVIDER: 'facebook',
 		ID: '1780092688878921',
-		SCOPE: ['public_profile', 'email', 'user_work_history', 'user_friends'] //Put here the others scopes that you want
+		SCOPE: ['public_profile', 'email'] //Put here the others scopes that you want
+	},
+	TWITTER: {
+		PROVIDER: 'twitter',
+		KEY: 'VCeCCnI1rxdyeKKEg4AsyBi8x',
+		SECRET: '9F8APlneimBYI5Vs41Nwpge1JUzEchO6wUOrOg6vaydcgL6qMN'
 	}
-	// TWITTER: {
-	// 	PROVIDER: 'twitter',
-	// 	KEY: 'VCeCCnI1rxdyeKKEg4AsyBi8x',
-	// 	SECRET: '9F8APlneimBYI5Vs41Nwpge1JUzEchO6wUOrOg6vaydcgL6qMN'
-	// }
 });

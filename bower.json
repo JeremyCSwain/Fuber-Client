@@ -6,7 +6,8 @@
   },
   "dependencies": {
     "firebase": "^3.0.5",
-    "IonicOAuthService": "ionic-oauth-service#*"
+    "IonicOAuthService": "ionic-oauth-service#*",
+    "angular-resource": "^1.5.7"
   },
   "homepage": "https://github.com/JeremyCSwain/Fuber-Client",
   "authors": [
