@@ -2,24 +2,29 @@
 
   <ion-header-bar class="bar bar-header bar-assertive-900">
 
+		<!-- If user is a truck, show button to change views -->
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
 			<span class="left-buttons">
-				<button class="button button-calm button-fab">
-					<i class="icon ion-pinpoint"></i>
-				</button>
+				<a href="#/user-main">
+					<button class="button button-calm button-fab">
+						<i class="icon ion-pinpoint"></i>
+					</button>
+				</a>
 			</span>
 		</div>
 		<div class="h1 title fab-left dark logo">
 			Fuber
 		</div>
+		<!-- Info button -->
 		<div class="buttons buttons-right header-item">
 			<span class="right-buttons">
-				<button class="button button-icon button-clear ion-android-more-vertical" ng-click="popover()"></button>
+				<button class="button button-icon button-clear ion-android-more-vertical"></button>
 			</span>
 		</div>
 
 	</ion-header-bar>
   
+  <!-- Map -->
   <ion-content>
     <div id="map" data-tap-disabled="true"></div>
   </ion-content>
