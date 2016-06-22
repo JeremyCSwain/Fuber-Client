@@ -14,11 +14,13 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 
   $ionicPlatform.ready(function() {
 
+  	// Email and password for firebase auth
   	$scope.account = {
   		email: "",
   		password: ""
   	};
 
+  	// Properties for new trucks to be stored in db
   	$scope.newUser = {
   		username: "",
   		truck_name: "",
@@ -29,6 +31,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
   		is_truck: false
   	};
 
+  	// Determines if the user is a food truck or a regular user
   	$scope.isTruck = function () {
   		if ($scope.newUser.is_truck) {
   			return true;
@@ -39,7 +42,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
   		}
   	};
 
-		// Registers a new user and creates a new user_data object.
+		// Registers a new user and creates a new user_data object through firebase.
 		$scope.register = function () {
 			ref.createUser({
 				// Set user with email and pw
@@ -56,7 +59,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 			});
 		};
 
-		// Authenticates and logs in a previously registered user.
+		// Authenticates and logs in a previously registered user with firebase.
 		$scope.login = function () {
 			authFactory.authenticate($scope.account)
 				.then(function () {
@@ -65,17 +68,19 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 				})
 		};
 
-		// Facebook OAuth login
+		// OAuth login
 		$scope.loginWithSocial = function(provider) {
 			oAuthService.login(provider, $scope.loginSuccessCallback, $scope.loginErrorCallback);
 		};
 
+		// If OAuth is successful, route user to main user view.
 		$scope.loginSuccessCallback = function(provider, authData) {
 			$location.path("/user-main");
 			$scope.$apply();
 			// util.showMsg('Success', JSON.stringify(authData));
 		};
 
+		// If OAuth fails, alert user to issue.
 		$scope.loginErrorCallback = function(provider, error) {
 			var errorDefaultMsg = "Invalid authentication";
 			var errorCancelMsg = null;
@@ -94,7 +99,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
 			showError(error, errorDefaultMsg, errorCancelMsg);
 		};
 
-		//Generic Functions
+		//Errors to throw using util service.
 		var showError = function(error, errorDefaultMsg, errorCancelMsg) {
 			var errorMessage = {
 				title: "Error",
@@ -133,7 +138,7 @@ app.controller('loginCtrl', function($scope, $http, $location, $ionicLoading, $i
       $scope.modal.remove();
     });
 
-    // Ionic Material Ripple Effect
+    // Ionic Material Ripple Effect for registration form.
     var reset = function() {
       var inClass = document.querySelectorAll('.in');
       for (var i = 0; i < inClass.length; i++) {

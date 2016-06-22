@@ -35,10 +35,6 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       }
     };
 
-    $scope.test = function () {
-      console.log("works");
-    };
-
     var lat;
     var long;
 
@@ -46,7 +42,8 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
     $ionicLoading.show({
       template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
-     
+    
+    // Google maps position option settings for map view.
     var posOptions = {
       enableHighAccuracy: true,
       timeout: 20000,
@@ -63,6 +60,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       // Set user's coords
       var myLatLng = new google.maps.LatLng(lat, long);
        
+      // Map settings
       var mapOptions = {
         center: myLatLng,
         zoom: 16,
@@ -78,7 +76,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       var infowindow = new google.maps.InfoWindow();
       var truckMarker = new google.maps.Marker();
 
-      // Get all truck locs, then refresh on setInterval
+      // Get all truck locs on page load.
       $scope.getAllTrucks = function () {
         return new Promise(function (resolve, reject) {
           $http.get(`http://localhost:3000/api/truck_user`)
@@ -88,16 +86,17 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
           )
         })
       };
-      // Invoke GET
+      // Invoke GET, if there are no active trucks, alert user
       $scope.getAllTrucks().then(
         function (allTrucksObj) {
           allTrucks = allTrucksObj;
           if (allTrucks.length == 0) {
-            alert("There are currently active trucks!");
+            $ionicPopup.alert('There are no active trucks!');
           }
           console.log("All Truck Users:", allTrucks);
         }
       )
+      // Add a marker for each truck at it's exact coords
       .then(
         function () {
           for (var i = 0; i < allTrucks.length; i++) { 
@@ -106,7 +105,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
               map: map,
               icon: `img/truck_icon.png`
             });
-            
+            // Add new infowindow to each marker with individual truck data
             truckMarker.info = new google.maps.InfoWindow({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               content:
@@ -116,22 +115,20 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
                   <p><a href="tel:+1-1${allTrucks[i].contact_info}">Place an Order</a></p>
                   <p><a href="${allTrucks[i].website_url}">More Info</a></p>
                   <button id="${allTrucks[i].twitter_handle}" class="button twitter-button">See Twitter Feed</button>
-
                 </div>`
             });
-            
+            // Adds event listener to truck markers to open infowindows
             google.maps.event.addListener(truckMarker, 'click', function() {
               this.info.open(map, this);
             });    
           }
         }
       );
-
+      // On map click, close infowindow
       google.maps.event.addListener(map, 'click', function() {
         infowindow.close();
       });
       
-
       // Begin marker refresh of truck locs on setInterval
       window.setInterval(
         function () {
@@ -193,19 +190,8 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       console.log("Current Truck Twitter Handle: ", twitterHandle);
     });
 
-    $scope.openModal = function() {
-      $scope.modal.show();
-    };
 
-    $scope.closeModal = function() {
-      $scope.modal.hide();
-    };
-
-    // Cleanup the modal when we're done with it
-    $scope.$on('$destroy', function() {
-      $scope.modal.remove();
-    });
-
+    // Accepts twitter handle of truck that is clicked and calls api with query.
     $scope.getTwitterFeed = function (twitterQuery) {
       return new Promise(function (resolve, reject) {
         $.ajax({
@@ -219,6 +205,21 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         });
       });
     }
+
+    // General openModal call to open modal
+    $scope.openModal = function() {
+      $scope.modal.show();
+    };
+
+    // Close modal
+    $scope.closeModal = function() {
+      $scope.modal.hide();
+    };
+
+    // Cleanup the modal when we're done with it
+    $scope.$on('$destroy', function() {
+      $scope.modal.remove();
+    });
 
   // End ionicPlatform.ready
   });

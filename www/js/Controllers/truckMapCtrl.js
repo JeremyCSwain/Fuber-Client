@@ -59,6 +59,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
      
+    // Options for constant watch of truck location
     var watchOptions = {
       enableHighAccuracy: true,
       timeout: 20000,
@@ -82,6 +83,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         // Set user's coords
         var myLatLng = new google.maps.LatLng(lat, long);
          
+        // Map options
         var mapOptions = {
           center: myLatLng,
           zoom: 16,

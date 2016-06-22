@@ -2,16 +2,20 @@
 
 	<ion-header-bar class="bar bar-header bar-assertive-900">
 
+		<!-- Header bar / Show button for 'truck-main' if the user is a food truck -->
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
 			<span class="left-buttons">
-				<a href="#/truck-main"><button class="button button-calm button-fab">
-					<i class="icon ion-pinpoint"></i>
-				</button></a>
+				<a href="#/truck-main">
+					<button class="button button-calm button-fab">
+						<i class="icon ion-pinpoint"></i>
+					</button>
+				</a>
 			</span>
 		</div>
 		<div class="h1 title fab-left dark logo">
 			Fuber
 		</div>
+		<!-- Info button -->
 		<div class="buttons buttons-right header-item">
 			<span class="right-buttons">
 				<button class="button button-icon button-clear ion-android-more-vertical"></button>
@@ -19,7 +23,8 @@
 		</div>
 
 	</ion-header-bar>
-  
+
+  <!-- Map -->
   <ion-content>
     <div id="map" data-tap-disabled="true"></div>
   </ion-content>
