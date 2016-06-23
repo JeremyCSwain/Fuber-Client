@@ -33,6 +33,12 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
             for (var i = 0; i < truckList.length; i++) {
               if(truckList[i].uid == currentUser.uid) {
                 currentTruck = truckList[i];
+                $http.put(
+                  `http://localhost:3000/api/truck_user/${currentTruck._id}`,
+                  JSON.stringify({
+                    is_active: true
+                  })
+                )
                 $scope.$apply();
               }
             }
@@ -59,8 +65,6 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
     $ionicLoading.show({
       template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
-
-
      
     // Options for constant watch of truck location
     var watchOptions = {
@@ -69,6 +73,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       maximumAge: 0
     };
 
+    // Initiate empty map marker.
     var truckMarker = new google.maps.Marker();
 
     // Constant watch of current user's current position lat, long
@@ -118,7 +123,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
                 long: long
               })
             )
-          }, 10000
+          }, 30000
         );
 
         $scope.map = map;   
@@ -146,9 +151,24 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       });
     };
 
+    $scope.setInactive = function () {
+      $http.put(
+        `http://localhost:3000/api/truck_user/${currentTruck._id}`,
+        JSON.stringify({
+          lat: null,
+          long: null,
+          is_active: false
+        })
+      ).then(
+        function () {
+          $location.path('/user-main');
+        }
+      )
+    }
+
     // Unauth through Firebase/LogOut
     $scope.logout = function () {
-      $http.post(
+      $http.put(
         `http://localhost:3000/api/truck_user/${currentTruck._id}`,
         JSON.stringify({
           lat: null,

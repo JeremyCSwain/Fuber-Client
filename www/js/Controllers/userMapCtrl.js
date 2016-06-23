@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicModal, $ionicActionSheet, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicModal, $ionicActionSheet, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
 
@@ -90,12 +90,17 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       // Invoke GET, if there are no active trucks, alert user
       $scope.getAllTrucks().then(
         function (allTrucksObj) {
+          var checkForNull = 0;
           allTrucks = allTrucksObj;
-          if (allTrucks.length == 0) {
-            $ionicPopup.alert({
-              title: "No active trucks!"
-            });
-          }
+          console.log("??", allTrucks);
+          for (var i = 0; i < allTrucks.length; i++) {
+            console.log("??", allTrucks[i].lat)
+          };
+          // if (checkForNull == null || checkForNull == 0) {
+          //   $ionicPopup.alert({
+          //     title: "No active trucks!"
+          //   });
+          // }
           console.log("All Truck Users:", allTrucks);
         }
       )
@@ -248,6 +253,10 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
           return true;
         }
       });
+    };
+
+    $scope.setActive = function () {
+      $location.path('/truck-main');
     };
 
     // Unauth through Firebase/LogOut
