@@ -19,7 +19,6 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       for (var i = 0; i < userList.length; i++) {
         if(userList[i].uid == authData.uid) {
           currentUser = userList[i];
-          // console.log("??", currentUser);
           $scope.$apply();
         }
       }
