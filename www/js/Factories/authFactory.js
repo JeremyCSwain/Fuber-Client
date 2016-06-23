@@ -21,7 +21,7 @@ app.factory("authFactory", function ($http, firebaseURL) {
     getUser () {
       return new Promise(function (resolve, reject) {
         $http.get(`http://localhost:3000/api/users/`)
-        .success(
+        .then(
           function (userObj) {resolve(userObj)},
           function (error) {reject(error)}
         )
@@ -32,7 +32,7 @@ app.factory("authFactory", function ($http, firebaseURL) {
     getTruck () {
     	return new Promise(function (resolve, reject) {
  				$http.get(`http://localhost:3000/api/truck_user`)
- 				.success(
+ 				.then(
  					function (truckObj) {resolve(truckObj)},
  					function (error) {reject(error)}
  				)  		
