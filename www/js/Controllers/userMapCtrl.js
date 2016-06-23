@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $timeout, $ionicModal, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicModal, $ionicActionSheet, $ionicPopup, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {  
 
@@ -23,7 +23,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       }
       console.log("Current User:", currentUser);
     });
-
+        
     // Checks if current user is a food truck user or not
     $scope.isTruck = function () {
       if (currentUser.is_truck) {
@@ -91,7 +91,9 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         function (allTrucksObj) {
           allTrucks = allTrucksObj;
           if (allTrucks.length == 0) {
-            $ionicPopup.alert('There are no active trucks!');
+            $ionicPopup.alert({
+              title: "No active trucks!"
+            });
           }
           console.log("All Truck Users:", allTrucks);
         }
@@ -103,18 +105,18 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
             truckMarker = new google.maps.Marker({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               map: map,
-              icon: `img/truck_icon.png`
+              icon: `../img/truck_icon.png`
             });
             // Add new infowindow to each marker with individual truck data
             truckMarker.info = new google.maps.InfoWindow({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               content:
                 `<div>
-                  <p>${allTrucks[i].truck_name}</p>
-                  <p>Style: ${allTrucks[i].cuisine}</p>
-                  <p><a href="tel:+1-1${allTrucks[i].contact_info}">Place an Order</a></p>
-                  <p><a href="${allTrucks[i].website_url}">More Info</a></p>
-                  <button id="${allTrucks[i].twitter_handle}" class="button twitter-button">See Twitter Feed</button>
+                  <div class="info-item logo" style="color: red; font-size: 18px; border-bottom: solid 1px red"><p>${allTrucks[i].truck_name}</p></div>
+                  <div class="info-item logo" style="color: red; font-size: 18px;"><p>We do ${allTrucks[i].cuisine}</p></div>
+                  <div class="info-item"><button id="${allTrucks[i].contact_info}" class="button button-small button-calm button-raised ink-dark icon-left ion-ios-telephone call-button">Place the Order</button></div>
+                  <a href="${allTrucks[i].website_url}"><div class="info-item"><button class="button button-small button-calm button-raised ink-dark icon-left ion-ios-information">Check The Web</button></div></a>
+                  <div class="info-item"><button id="${allTrucks[i].twitter_handle}" class="button button-small button-calm button-raised ink-dark icon-left ion-social-twitter twitter-button">See the tweets</button></div>
                 </div>`
             });
             // Adds event listener to truck markers to open infowindows
@@ -132,6 +134,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       // Begin marker refresh of truck locs on setInterval
       window.setInterval(
         function () {
+          console.log("Truck Coords Updated for User.");
           // GET all truck locations
           $scope.getAllTrucks = function () {
             return new Promise(function (resolve, reject) {
@@ -157,7 +160,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
               }
             }
           );
-        }, 20000 
+        }, 10000 
       );
 
       $scope.map = map;   
@@ -190,15 +193,23 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
       console.log("Current Truck Twitter Handle: ", twitterHandle);
     });
 
+    // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
+    $('#map').on('click', '.call-button', function (event) {
+      window.open(`tel:${event.currentTarget.id}`, '_system')
+      console.log('??', event.currentTarget.id);
+    });
+
 
     // Accepts twitter handle of truck that is clicked and calls api with query.
     $scope.getTwitterFeed = function (twitterQuery) {
       return new Promise(function (resolve, reject) {
         $.ajax({
-          url: 'https://api.twitter.com/1.1/search/tweets.json?' + $.param(twitterQuery),
-          dataType: 'jsonp',
-          success: function(tweetsObj) {
-            resolve(tweetsObj)
+          url: 'http://localhost:3000/twitter/',
+          dataType: 'json',
+          method: 'GET',
+          success: function callback (data) {
+            console.log("data", data);
+            // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
           }
@@ -220,6 +231,28 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
     $scope.$on('$destroy', function() {
       $scope.modal.remove();
     });
+
+    // Triggered on a button click, or some other target
+    $scope.actionSheet = function() {
+      // Show the action sheet
+      var hideSheet = $ionicActionSheet.show({
+        destructiveText: 'Logout', 
+        destructiveButtonClicked: function () {
+          $scope.logout();
+          return true;
+        },
+        cancelText: 'Cancel',
+        cancelButtonClicked: function() {
+          return true;
+        }
+      });
+    };
+
+    // Unauth through Firebase/LogOut
+    $scope.logout = function () {
+      console.log("User is logged out.");
+      ref.unauth();
+    };
 
   // End ionicPlatform.ready
   });

@@ -6,7 +6,7 @@
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
 			<span class="left-buttons">
 				<a href="#/user-main">
-					<button class="button button-calm button-fab">
+					<button class="button button-calm button-fab" ng-click="goToUserView()">
 						<i class="icon ion-pinpoint"></i>
 					</button>
 				</a>
@@ -18,7 +18,7 @@
 		<!-- Info button -->
 		<div class="buttons buttons-right header-item">
 			<span class="right-buttons">
-				<button class="button button-icon button-clear ion-android-more-vertical"></button>
+				<button class="button button-icon button-clear ion-android-more-vertical" ng-click="actionSheet()"></button>
 			</span>
 		</div>
 

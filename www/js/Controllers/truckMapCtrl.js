@@ -1,7 +1,7 @@
 "use strict";
 
 
-app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ionicLoading, $ionicPlatform, ionicMaterialInk, firebaseURL, authFactory) {
+app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cordovaGeolocation, $ionicLoading, $ionicPlatform, $ionicActionSheet, ionicMaterialInk, firebaseURL, authFactory) {
      
   $ionicPlatform.ready(function() {   
 
@@ -66,6 +66,8 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
       maximumAge: 0
     };
 
+    var truckMarker = new google.maps.Marker();
+
     // Constant watch of current user's current position lat, long
     var watch = $cordovaGeolocation.watchPosition(watchOptions);
 
@@ -95,15 +97,17 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
         // Drop marker on user's location
-        var truckMarker = new google.maps.Marker({
+        truckMarker = new google.maps.Marker({
           position: new google.maps.LatLng(lat, long),
           map: map
         });
 
         truckMarker.setPosition(myLatLng);
 
+        // On setInterval update truck's lat/long
         window.setInterval(
           function () {
+            console.log("Coords Updated at Interval.");
             $http.put(
               `http://localhost:3000/api/truck_user/${currentTruck._id}`,
               JSON.stringify({
@@ -111,7 +115,7 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
                 long: long
               })
             )
-          }, 20000
+          }, 10000
         );
 
         $scope.map = map;   
@@ -122,6 +126,38 @@ app.controller('truckMapCtrl', function($scope, $http, $cordovaGeolocation, $ion
         console.log(err);
       }
     );
+
+    // Triggered on a button click, or some other target
+    $scope.actionSheet = function() {
+      // Show the action sheet
+      var hideSheet = $ionicActionSheet.show({
+        destructiveText: 'Logout', 
+        destructiveButtonClicked: function () {
+          $scope.logout();
+          return true;
+        },
+        cancelText: 'Cancel',
+        cancelButtonClicked: function() {
+          return true;
+        }
+      });
+    };
+
+    // Unauth through Firebase/LogOut
+    $scope.logout = function () {
+      $http.post(
+        `http://localhost:3000/api/truck_user/${currentTruck._id}`,
+        JSON.stringify({
+          lat: null,
+          long: null
+        })
+      ).then(
+        function () {
+          ref.unauth();
+          console.log("User is logged out.");
+        }
+      )
+    };
     
   // End ionicPlatform.ready
   });
