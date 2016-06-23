@@ -4,16 +4,12 @@
 
 		<!-- Header bar / Show button for 'truck-main' if the user is a food truck -->
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
-			<span class="left-buttons">
-				<button class="button button-calm button-fab" ng-click="setActive()">
-					<i class="icon ion-pinpoint"></i>
-				</button>	
-			</span>
 		</div>
 		<div class="h1 title fab-left dark logo">
 			Fuber
 		</div>
-		<!-- Info button -->
+
+		<!-- Action Menu -->
 		<div class="buttons buttons-right header-item">
 			<span class="right-buttons">
 				<button class="button button-icon button-clear ion-android-more-vertical" ng-click="actionSheet()"></button>
@@ -26,6 +22,20 @@
   <ion-content>
     <div id="map" data-tap-disabled="true"></div>
   </ion-content>
+
+  <div class="bar bar-footer bar-assertive-900">
+  	<div class="buttons buttons-left" ng-if="isTruck()">
+  		<button class="button button-calm button-fab" ng-click="setActive()">
+  			<i class="icon ion-pinpoint"></i>
+  		</button>
+  	</div>
+  	<div class="title logo" ng-if="isTruck()">
+  		Hit it to dish it
+  	</div>
+  	<div class="title logo" ng-if="!isTruck()">
+  		Find the Fu
+  	</div>
+  </div>
 
 </ion-pane>
 
