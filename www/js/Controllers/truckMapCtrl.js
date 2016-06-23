@@ -20,7 +20,6 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       for (var i = 0; i < userList.length; i++) {
         if(userList[i].uid == authData.uid) {
           currentUser = userList[i];
-          // console.log("??", currentUser);
           $scope.$apply();
         }
       }
@@ -30,9 +29,10 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       function () {
         if (currentUser.is_truck) {
           authFactory.getTruck().then(function (TruckObj) {
-            for (var i = 0; i < TruckObj.length; i++) {
-              if(TruckObj[i].uid == currentUser.uid) {
-                currentTruck = TruckObj[i];
+            var truckList = TruckObj.data;
+            for (var i = 0; i < truckList.length; i++) {
+              if(truckList[i].uid == currentUser.uid) {
+                currentTruck = truckList[i];
                 $scope.$apply();
               }
             }
@@ -59,6 +59,8 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
     $ionicLoading.show({
       template: '<div class="loader"><svg class="circular"><circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/></svg></div><br/>Acquiring location!'
     });
+
+
      
     // Options for constant watch of truck location
     var watchOptions = {
