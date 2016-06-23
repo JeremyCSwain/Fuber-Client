@@ -14,16 +14,18 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
 
     // If user isAuthorized, get users and set current user based on uid.
     authFactory.getUser().then(function (UserObj) {
+      var userList = UserObj.data;
       var authData = ref.getAuth();
-      for (var i = 0; i < UserObj.length; i++) {
-        if(UserObj[i].firebaseUID == authData.uid) {
-          currentUser = UserObj[i];
+      for (var i = 0; i < userList.length; i++) {
+        if(userList[i].uid == authData.uid) {
+          currentUser = userList[i];
+          // console.log("??", currentUser);
           $scope.$apply();
         }
       }
       console.log("Current User:", currentUser);
     });
-        
+
     // Checks if current user is a food truck user or not
     $scope.isTruck = function () {
       if (currentUser.is_truck) {
@@ -34,7 +36,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         $scope.$apply();
       }
     };
-
+ 
     var lat;
     var long;
 
@@ -171,6 +173,7 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
         console.log(err);
       }
     );
+
 
     // User modal partial for twitter feed registration
     $ionicModal.fromTemplateUrl('../partials/twitter_modal.html', {

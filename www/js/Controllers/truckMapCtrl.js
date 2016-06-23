@@ -15,22 +15,23 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
 
     // If user isAuthorized, get users and set current user based on uid.
     authFactory.getUser().then(function (UserObj) {
+      var userList = UserObj.data;
       var authData = ref.getAuth();
-      for (var i = 0; i < UserObj.length; i++) {
-        if(UserObj[i].firebaseUID == authData.uid) {
-          currentUser = UserObj[i];
+      for (var i = 0; i < userList.length; i++) {
+        if(userList[i].uid == authData.uid) {
+          currentUser = userList[i];
+          // console.log("??", currentUser);
           $scope.$apply();
         }
       }
       console.log("Current User:", currentUser);
-    })
-    .then(
+    }).then(
     // Get current User's truck_user data for location update.
       function () {
         if (currentUser.is_truck) {
           authFactory.getTruck().then(function (TruckObj) {
             for (var i = 0; i < TruckObj.length; i++) {
-              if(TruckObj[i].firebaseUID == currentUser.firebaseUID) {
+              if(TruckObj[i].uid == currentUser.uid) {
                 currentTruck = TruckObj[i];
                 $scope.$apply();
               }
