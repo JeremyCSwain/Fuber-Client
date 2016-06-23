@@ -20,7 +20,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       for (var i = 0; i < userList.length; i++) {
         if(userList[i].uid == authData.uid) {
           currentUser = userList[i];
-          $scope.$apply();
+          // $scope.$apply();
         }
       }
       console.log("Current User:", currentUser);
@@ -39,7 +39,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
                     is_active: true
                   })
                 )
-                $scope.$apply();
+                // $scope.$apply();
               }
             }
           })
@@ -51,10 +51,10 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
     $scope.isTruck = function () {
       if (currentUser.is_truck) {
         return true;
-        $scope.$apply();
+        // $scope.$apply();
       } else {
         return false;
-        $scope.$apply();
+        // $scope.$apply();
       }
     };
 
@@ -161,7 +161,8 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
         })
       ).then(
         function () {
-          $location.path('/user-main');
+          $location.path("/user-main");
+          
         }
       )
     }

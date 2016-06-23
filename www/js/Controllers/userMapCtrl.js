@@ -19,7 +19,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       for (var i = 0; i < userList.length; i++) {
         if(userList[i].uid == authData.uid) {
           currentUser = userList[i];
-          $scope.$apply();
+          // $scope.$apply();
         }
       }
       console.log("Current User:", currentUser);
@@ -29,10 +29,10 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
     $scope.isTruck = function () {
       if (currentUser.is_truck) {
         return true;
-        $scope.$apply();
+        // $scope.$apply();
       } else {
         return false;
-        $scope.$apply();
+        // $scope.$apply();
       }
     };
  
@@ -90,17 +90,20 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       // Invoke GET, if there are no active trucks, alert user
       $scope.getAllTrucks().then(
         function (allTrucksObj) {
-          var checkForNull = 0;
+          // Before GET of all trucks, if none are active alert user.
+          var thereAreActives = false;
+          // Set array of all truck objects
           allTrucks = allTrucksObj;
-          console.log("??", allTrucks);
-          for (var i = 0; i < allTrucks.length; i++) {
-            console.log("??", allTrucks[i].lat)
-          };
-          // if (checkForNull == null || checkForNull == 0) {
-          //   $ionicPopup.alert({
-          //     title: "No active trucks!"
-          //   });
-          // }
+          for (var i in allTrucks) {
+            if (allTrucks[i].is_active === true) {
+              thereAreActives = true;
+            }
+          }
+          if (thereAreActives == false) {
+            $ionicPopup.alert({
+              title: "No active trucks!"
+            });
+          }
           console.log("All Truck Users:", allTrucks);
         }
       )
