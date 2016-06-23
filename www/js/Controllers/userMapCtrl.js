@@ -110,11 +110,11 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               content:
                 `<div>
-                  <p>${allTrucks[i].truck_name}</p>
-                  <p>Style: ${allTrucks[i].cuisine}</p>
-                  <p><a href="tel:+1-1${allTrucks[i].contact_info}">Place an Order</a></p>
-                  <p><a href="${allTrucks[i].website_url}">More Info</a></p>
-                  <button id="${allTrucks[i].twitter_handle}" class="button twitter-button">See Twitter Feed</button>
+                  <div class="info-item logo" style="color: red; font-size: 18px; border-bottom: solid 1px red"><p>${allTrucks[i].truck_name}</p></div>
+                  <div class="info-item logo" style="color: red; font-size: 18px;"><p>We do ${allTrucks[i].cuisine}</p></div>
+                  <a href="tel:+1-1${allTrucks[i].contact_info}"><div class="info-item"><button class="button button-small button-calm button-raised ink-dark icon-left ion-ios-telephone">Place the Order</button></div></a>
+                  <a href="${allTrucks[i].website_url}"><div class="info-item"><button class="button button-small button-calm button-raised ink-dark icon-left ion-ios-information">Check The Web</button></div></a>
+                  <div class="info-item"><button id="${allTrucks[i].twitter_handle}" class="button button-small button-calm button-raised ink-dark icon-left ion-social-twitter twitter-button">See the tweets</button></div>
                 </div>`
             });
             // Adds event listener to truck markers to open infowindows
@@ -194,11 +194,21 @@ app.controller('userMapCtrl', function($scope, $http, $cordovaGeolocation, $ioni
     // Accepts twitter handle of truck that is clicked and calls api with query.
     $scope.getTwitterFeed = function (twitterQuery) {
       return new Promise(function (resolve, reject) {
+        // $http.get(
+        //   'http://127.0.0.1/twitter_api/twitter_api.php/' + '?q=%23freebandnames'
+        // ).success(
+        //   function (tweetsObj) {
+        //     console.log("??", tweetsObj);
+        //   }
+        // )
         $.ajax({
-          url: 'https://api.twitter.com/1.1/search/tweets.json?' + $.param(twitterQuery),
-          dataType: 'jsonp',
-          success: function(tweetsObj) {
-            resolve(tweetsObj)
+          url: 'http://127.0.0.1/twitter_api/twitter_api.php/',
+          dataType: 'json',
+          jsonp: 'callback',
+          method: 'GET',
+          success: function callback (data) {
+            console.log("data", data);
+            // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
           }

@@ -17,6 +17,11 @@ html, body {
 	width: 100%;
 }
 
+a {
+	color: white;
+	text-decoration: none;
+}
+
 .center {
 	text-align: center;
 }
@@ -41,4 +46,13 @@ html, body {
 
 #twitter-btn:before {
 	font-size: 45px;
+}
+
+.info-item {
+	padding-top: 5px;
+	width: 100%;
+}
+
+.info-item button {
+	width: 100%;
 }
