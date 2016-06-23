@@ -5,11 +5,9 @@
 		<!-- If user is a truck, show button to change views -->
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
 			<span class="left-buttons">
-				<a href="#/user-main">
-					<button class="button button-calm button-fab" ng-click="goToUserView()">
-						<i class="icon ion-pinpoint"></i>
-					</button>
-				</a>
+				<button class="button button-calm button-fab" ng-click="setInactive()">
+					<i class="icon ion-pinpoint"></i>
+				</button>
 			</span>
 		</div>
 		<div class="h1 title fab-left dark logo">

@@ -5,11 +5,9 @@
 		<!-- Header bar / Show button for 'truck-main' if the user is a food truck -->
 		<div class="buttons buttons-left header-item" ng-if="isTruck()">
 			<span class="left-buttons">
-				<a href="#/truck-main">
-					<button class="button button-calm button-fab">
-						<i class="icon ion-pinpoint"></i>
-					</button>
-				</a>
+				<button class="button button-calm button-fab" ng-click="setActive()">
+					<i class="icon ion-pinpoint"></i>
+				</button>	
 			</span>
 		</div>
 		<div class="h1 title fab-left dark logo">
