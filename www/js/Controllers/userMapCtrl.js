@@ -220,7 +220,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
     $scope.getTwitterFeed = function (twitterQuery) {
       return new Promise(function (resolve, reject) {
         $.ajax({
-          url: 'http://localhost:3000/twitter/',
+          url: `http://localhost:3000/twitter/${twitterQuery}`,
           dataType: 'json',
           method: 'GET',
           success: function callback (data) {
@@ -233,8 +233,6 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
                 urls: [data.statuses[i].entities.urls]
               });
             }
-              console.log("??", $scope.tweets);
-            // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
           }

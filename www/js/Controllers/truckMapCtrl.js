@@ -155,7 +155,14 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       });
     };
 
+    // Clear that interval!
     $scope.endTruck = function () {
+      clearInterval(driverInterval);
+      $scope.setInactive();
+    };
+
+    // Deactivate truck/remove coords
+    $scope.setInactive = function () {
       $http.put(
         `http://localhost:3000/api/truck_user/${currentTruck._id}`,
         JSON.stringify({
@@ -165,15 +172,9 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
         })
       ).then(
         function () {
-          $scope.setInactive();
+          $location.path("/user-main");
         }
       )
-    };
-
-    // Deactivate truck/remove coords
-    $scope.setInactive = function () {
-      clearInterval(driverInterval);
-      $location.path("/user-main");
     };
 
     // Unauth through Firebase/LogOut/remove coords/deactivate marker
