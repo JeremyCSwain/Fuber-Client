@@ -147,7 +147,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       });
       
       // Begin marker refresh of truck locs on setInterval
-      setInterval(
+      userInterval = setInterval(
         function () {
           console.log("Truck Coords Updated for User.");
           // GET all truck locations
@@ -196,17 +196,15 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       $scope.modal = modal;
     });
 
+    var twitterQuery;
     // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
     $('#map').on('click', '.twitter-button', function (event) {
       $scope.modal.show();
-      var twitterHandle = event.currentTarget.id;
-      var twitterQuery = {
-        q: twitterHandle
-      };
+      var twitterQuery = event.currentTarget.id;
       $scope.getTwitterFeed(twitterQuery).then(function (tweetsObj) {
         console.log("???", tweetsObj);
       });
-      console.log("Current Truck Twitter Handle: ", twitterHandle);
+      console.log("Current Truck Twitter Handle: ", twitterQuery);
     });
 
     // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
