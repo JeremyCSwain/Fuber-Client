@@ -13,6 +13,9 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
     var currentUser = {};
     var currentTruck = {};
 
+    // Set globally to be set interval function
+    var driverInterval;
+
     // If user isAuthorized, get users and set current user based on uid.
     authFactory.getUser().then(function (UserObj) {
       var userList = UserObj.data;
@@ -113,7 +116,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
         truckMarker.setPosition(myLatLng);
 
         // On setInterval update truck's lat/long
-        window.setInterval(
+        driverInterval = setInterval(
           function () {
             console.log("Coords Updated at Interval.");
             $http.put(
@@ -123,7 +126,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
                 long: long
               })
             )
-          }, 30000
+          }, 7000
         );
 
         $scope.map = map;   
@@ -141,6 +144,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       var hideSheet = $ionicActionSheet.show({
         destructiveText: 'Logout', 
         destructiveButtonClicked: function () {
+          clearInterval(driverInterval);
           $scope.logout();
           return true;
         },
@@ -151,7 +155,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
       });
     };
 
-    $scope.setInactive = function () {
+    $scope.endTruck = function () {
       $http.put(
         `http://localhost:3000/api/truck_user/${currentTruck._id}`,
         JSON.stringify({
@@ -161,27 +165,37 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
         })
       ).then(
         function () {
-          $location.path("/user-main");
-          
+          $scope.setInactive();
         }
       )
-    }
+    };
 
-    // Unauth through Firebase/LogOut
+    // Deactivate truck/remove coords
+    $scope.setInactive = function () {
+      clearInterval(driverInterval);
+      $location.path("/user-main");
+    };
+
+    // Unauth through Firebase/LogOut/remove coords/deactivate marker
     $scope.logout = function () {
+      return new Promise(function () {
+        clearInterval(driverInterval);
+      }).then(
       $http.put(
         `http://localhost:3000/api/truck_user/${currentTruck._id}`,
         JSON.stringify({
           lat: null,
-          long: null
+          long: null,
+          is_active: false
         })
-      ).then(
+      )
+      .then(
         function () {
           ref.unauth();
           console.log("User is logged out.");
         }
       )
-    };
+    )};
     
   // End ionicPlatform.ready
   });

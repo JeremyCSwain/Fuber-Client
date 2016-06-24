@@ -5,12 +5,18 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
      
   $ionicPlatform.ready(function() {  
 
+    $scope.tweets = [];
+
     // Ionic Material Ink
     ionicMaterialInk.displayEffect();
 
     var ref = new Firebase(firebaseURL);
 
-    var currentUser = {};  
+    var currentUser = {}; 
+
+    // Globally set var to be setInterval on truck locs
+    var userInterval;
+    var continueInterval = true;
 
     // If user isAuthorized, get users and set current user based on uid.
     authFactory.getUser().then(function (UserObj) {
@@ -114,7 +120,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
             truckMarker = new google.maps.Marker({
               position: new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long),
               map: map,
-              icon: `../img/truck_icon.png`
+              icon: '../img/truck_icon.png'
             });
             // Add new infowindow to each marker with individual truck data
             truckMarker.info = new google.maps.InfoWindow({
@@ -141,7 +147,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       });
       
       // Begin marker refresh of truck locs on setInterval
-      window.setInterval(
+      setInterval(
         function () {
           console.log("Truck Coords Updated for User.");
           // GET all truck locations
@@ -169,7 +175,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
               }
             }
           );
-        }, 10000 
+        }, 7000 
       );
 
       $scope.map = map;   
@@ -218,7 +224,16 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           dataType: 'json',
           method: 'GET',
           success: function callback (data) {
-            console.log("data", data);
+            for (var i = 0; i < data.statuses.length; i++) {
+              $scope.tweets.push({
+                screen_name: data.statuses[i].user.screen_name,
+                text: data.statuses[i].text,
+                image: data.statuses[i].user.profile_image_url,
+                date: new Date(Date.parse(data.statuses[i].created_at)),
+                urls: [data.statuses[i].entities.urls]
+              });
+            }
+              console.log("??", $scope.tweets);
             // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
@@ -248,6 +263,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       var hideSheet = $ionicActionSheet.show({
         destructiveText: 'Logout', 
         destructiveButtonClicked: function () {
+          clearInterval(userInterval);
           $scope.logout();
           return true;
         },
@@ -259,11 +275,13 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
     };
 
     $scope.setActive = function () {
+      clearInterval(userInterval);
       $location.path('/truck-main');
     };
 
     // Unauth through Firebase/LogOut
     $scope.logout = function () {
+      clearInterval(userInterval)
       console.log("User is logged out.");
       ref.unauth();
     };
