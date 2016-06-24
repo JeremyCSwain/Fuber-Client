@@ -1,7 +1,21 @@
 <ion-modal-view>
 
-	<div id="results">
-		
+	<div id="results" ng-repeat="tweet in tweets">
+		<div class="list card">
+
+			  <div class="item item-avatar">
+			    <img ng-src="{{ tweet.image }}">
+			    <h2>{{ tweet.screen_name }} 
+			    	<a href="{{ url[0].url }}" ng-repeat="url in tweet.urls">
+			    		<i class="icon positive ion-social-twitter" style="padding-left: 10px;"></i>
+			    	</a>
+			    </h2>
+			    <p>{{ tweet.date }}</p>
+			  </div>
+		  <div class="item item-text-wrap ">
+		    {{ tweet.text }}
+		  </div>
+		</div>
 	</div>
 
 </ion-modal-view>

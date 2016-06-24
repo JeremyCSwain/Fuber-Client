@@ -5,6 +5,8 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
      
   $ionicPlatform.ready(function() {  
 
+    $scope.tweets = [];
+
     // Ionic Material Ink
     ionicMaterialInk.displayEffect();
 
@@ -222,7 +224,16 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           dataType: 'json',
           method: 'GET',
           success: function callback (data) {
-            console.log("data", data);
+            for (var i = 0; i < data.statuses.length; i++) {
+              $scope.tweets.push({
+                screen_name: data.statuses[i].user.screen_name,
+                text: data.statuses[i].text,
+                image: data.statuses[i].user.profile_image_url,
+                date: new Date(Date.parse(data.statuses[i].created_at)),
+                urls: [data.statuses[i].entities.urls]
+              });
+            }
+              console.log("??", $scope.tweets);
             // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
