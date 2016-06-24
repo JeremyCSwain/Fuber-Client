@@ -81,6 +81,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       // Set empty array for all truck coords.
       var allTrucks = [];
       var infowindow = new google.maps.InfoWindow();
+
       var truckMarker = new google.maps.Marker();
 
       // Get all truck locs on page load.
@@ -141,6 +142,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           }
         }
       );
+
       // On map click, close infowindow
       google.maps.event.addListener(map, 'click', function() {
         infowindow.close();
@@ -149,7 +151,6 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       // Begin marker refresh of truck locs on setInterval
       userInterval = setInterval(
         function () {
-          console.log("Truck Coords Updated for User.");
           // GET all truck locations
           $scope.getAllTrucks = function () {
             return new Promise(function (resolve, reject) {
@@ -164,18 +165,13 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           $scope.getAllTrucks().then(
             function (allTrucksObj) {
               allTrucks = allTrucksObj;
-              console.log("All Truck User Coords:", allTrucks);
+              for (var i = 0; i < allTrucks.length; i++) {
+                truckMarker.setPosition(new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long));
+              }
+              console.log("Truck Coords Updated for User.");
             }
           )
-          .then(
-            function () {
-              for (var i = 0; i < allTrucks.length; i++) {
-                var currTruckCoord = new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long);
-                truckMarker.setPosition(currTruckCoord);
-              }
-            }
-          );
-        }, 7000 
+        }, 10000 
       );
 
       $scope.map = map;   

@@ -126,7 +126,7 @@ app.controller('truckMapCtrl', function($scope, $http, $location, $timeout, $cor
                 long: long
               })
             )
-          }, 7000
+          }, 10000
         );
 
         $scope.map = map;   
