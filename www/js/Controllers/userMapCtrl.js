@@ -81,6 +81,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       // Set empty array for all truck coords.
       var allTrucks = [];
       var infowindow = new google.maps.InfoWindow();
+
       var truckMarker = new google.maps.Marker();
 
       // Get all truck locs on page load.
@@ -141,15 +142,15 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           }
         }
       );
+
       // On map click, close infowindow
       google.maps.event.addListener(map, 'click', function() {
         infowindow.close();
       });
       
       // Begin marker refresh of truck locs on setInterval
-      setInterval(
+      userInterval = setInterval(
         function () {
-          console.log("Truck Coords Updated for User.");
           // GET all truck locations
           $scope.getAllTrucks = function () {
             return new Promise(function (resolve, reject) {
@@ -164,18 +165,13 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
           $scope.getAllTrucks().then(
             function (allTrucksObj) {
               allTrucks = allTrucksObj;
-              console.log("All Truck User Coords:", allTrucks);
+              for (var i = 0; i < allTrucks.length; i++) {
+                truckMarker.setPosition(new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long));
+              }
+              console.log("Truck Coords Updated for User.");
             }
           )
-          .then(
-            function () {
-              for (var i = 0; i < allTrucks.length; i++) {
-                var currTruckCoord = new google.maps.LatLng(allTrucks[i].lat, allTrucks[i].long);
-                truckMarker.setPosition(currTruckCoord);
-              }
-            }
-          );
-        }, 7000 
+        }, 10000 
       );
 
       $scope.map = map;   
@@ -196,17 +192,15 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
       $scope.modal = modal;
     });
 
+    var twitterQuery;
     // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
     $('#map').on('click', '.twitter-button', function (event) {
       $scope.modal.show();
-      var twitterHandle = event.currentTarget.id;
-      var twitterQuery = {
-        q: twitterHandle
-      };
+      var twitterQuery = event.currentTarget.id;
       $scope.getTwitterFeed(twitterQuery).then(function (tweetsObj) {
         console.log("???", tweetsObj);
       });
-      console.log("Current Truck Twitter Handle: ", twitterHandle);
+      console.log("Current Truck Twitter Handle: ", twitterQuery);
     });
 
     // On click of truck's infowindow button, pass the truck's twitter handle to the api call function for twitter feed.
@@ -220,7 +214,7 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
     $scope.getTwitterFeed = function (twitterQuery) {
       return new Promise(function (resolve, reject) {
         $.ajax({
-          url: 'http://localhost:3000/twitter/',
+          url: `http://localhost:3000/twitter/${twitterQuery}`,
           dataType: 'json',
           method: 'GET',
           success: function callback (data) {
@@ -233,8 +227,6 @@ app.controller('userMapCtrl', function($scope, $http, $location, $cordovaGeoloca
                 urls: [data.statuses[i].entities.urls]
               });
             }
-              console.log("??", $scope.tweets);
-            // $('#results').html('<html>' + data + '</html>');
           }, function (error) {
             reject(error)
           }
